@@ -4,36 +4,45 @@ const GameManager = require('./gameManager.js').default;
 
 class Main {
   constructor() {
-    // 1. 获取 Canvas（微信小游戏环境专用）
-    const canvas = (typeof window !== 'undefined' && window.canvas) ? window.canvas : GameGlobal.screencanvas;
+    // 1. 检查是否在微信环境中
+    this.isWechatEnv = typeof wx !== 'undefined' && typeof GameGlobal !== 'undefined';
 
-    // 2. 创建 THREE 作用域（传入 canvas，适配器会自动处理上下文）
-    this.THREE = createScopedThreejs(canvas);
+    if (this.isWechatEnv) {
+      // 微信环境，正常初始化
+      // 1. 获取 Canvas（微信小游戏环境专用）
+      const canvas = (typeof window !== 'undefined' && window.canvas) ? window.canvas : GameGlobal.screencanvas;
 
-    // 3. 获取系统信息，用于适配屏幕尺寸
-    const systemInfo = wx.getSystemInfoSync();
-    this.windowWidth = systemInfo.windowWidth;
-    this.windowHeight = systemInfo.windowHeight;
-    this.pixelRatio = Math.min(systemInfo.pixelRatio, 2); // 限制像素比，优化性能
+      // 2. 创建 THREE 作用域（传入 canvas，适配器会自动处理上下文）
+      this.THREE = createScopedThreejs(canvas);
 
-    // 4. 初始化渲染器
-    this.initRenderer(canvas);
+      // 3. 获取系统信息，用于适配屏幕尺寸
+      const systemInfo = wx.getSystemInfoSync();
+      this.windowWidth = systemInfo.windowWidth;
+      this.windowHeight = systemInfo.windowHeight;
+      this.pixelRatio = Math.min(systemInfo.pixelRatio, 2); // 限制像素比，优化性能
 
-    // 5. 初始化场景和相机
-    this.initScene();
+      // 4. 初始化渲染器
+      this.initRenderer(canvas);
 
-    // 6. 初始化游戏管理器
-    this.gameManager = new GameManager();
-    
-    // 7. 初始化魔方
-    this.initCube();
-    
-    // 存储游戏管理器的魔方引用
-    this.gameManager.cube = this.cube;
-    this.gameManager.THREE = this.THREE;
-    
-    this.lastTime = Date.now();
-    this.animate();
+      // 5. 初始化场景和相机
+      this.initScene();
+
+      // 6. 初始化游戏管理器
+      this.gameManager = new GameManager();
+      
+      // 7. 初始化魔方
+      this.initCube();
+      
+      // 存储游戏管理器的魔方引用
+      this.gameManager.cube = this.cube;
+      this.gameManager.THREE = this.THREE;
+      
+      this.lastTime = Date.now();
+      this.animate();
+    } else {
+      // 非微信环境，输出提示信息
+      console.log('当前环境不是微信小游戏环境，无法初始化游戏');
+    }
   }
   
   initRenderer(canvas) {

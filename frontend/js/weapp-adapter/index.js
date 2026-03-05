@@ -1,84 +1,60 @@
-// weapp-adapter - 模拟浏览器API环境
+import * as _window from './window'
+import document from './document'
 
-// 模拟window对象
-const window = {
-  innerWidth: canvas.width,
-  innerHeight: canvas.height,
-  devicePixelRatio: wx.getSystemInfoSync().devicePixelRatio || 1,
-  addEventListener: function() {},
-  removeEventListener: function() {},
-  setTimeout: setTimeout,
-  clearTimeout: clearTimeout,
-  setInterval: setInterval,
-  clearInterval: clearInterval
-};
+const global = GameGlobal
 
-// 模拟document对象
-const document = {
-  createElement: function(tag) {
-    if (tag === 'canvas') {
-      return canvas;
+GameGlobal.global = GameGlobal.global || global
+
+function inject() {
+    _window.document = document;
+
+    _window.addEventListener = (type, listener) => {
+        _window.document.addEventListener(type, listener)
     }
-    return {};
-  },
-  addEventListener: function() {},
-  removeEventListener: function() {}
-};
-
-// 模拟navigator对象
-const navigator = {
-  userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1',
-  platform: 'iPhone'
-};
-
-// 模拟XMLHttpRequest
-class XMLHttpRequest {
-  constructor() {
-    this.onreadystatechange = null;
-    this.readyState = 0;
-    this.status = 0;
-    this.responseText = '';
-  }
-  open(method, url) {
-    this.method = method;
-    this.url = url;
-    this.readyState = 1;
-  }
-  send(data) {
-    this.readyState = 4;
-    this.status = 200;
-    this.responseText = '';
-    if (this.onreadystatechange) {
-      this.onreadystatechange();
+    _window.removeEventListener = (type, listener) => {
+        _window.document.removeEventListener(type, listener)
     }
-  }
+    _window.dispatchEvent = function(event = {}) {
+        console.log('window.dispatchEvent', event.type, event);
+        // nothing to do
+    }
+
+    const { platform } = wx.getSystemInfoSync()
+
+    // 开发者工具无法重定义 window
+    if (typeof __devtoolssubcontext === 'undefined' && platform === 'devtools') {
+        for (const key in _window) {
+            const descriptor = Object.getOwnPropertyDescriptor(global, key)
+
+            if (!descriptor || descriptor.configurable === true) {
+                Object.defineProperty(window, key, {
+                    value: _window[key]
+                })
+            }
+        }
+
+        for (const key in _window.document) {
+            const descriptor = Object.getOwnPropertyDescriptor(global.document, key)
+
+            if (!descriptor || descriptor.configurable === true) {
+                Object.defineProperty(global.document, key, {
+                    value: _window.document[key]
+                })
+            }
+        }
+        window.parent = window
+        window.wx = wx
+    } else {
+        _window.wx = wx;
+        for (const key in _window) {
+            global[key] = _window[key]
+        }
+        global.window = global
+        global.top = global.parent = global
+    }
 }
 
-// 模拟WebGLRenderingContext
-const WebGLRenderingContext = canvas.getContext('webgl').constructor;
-
-// 模拟其他必要的API
-const performance = {
-  now: function() {
-    return Date.now();
-  }
-};
-
-// 暴露到全局作用域
-global.window = window;
-global.document = document;
-global.navigator = navigator;
-global.XMLHttpRequest = XMLHttpRequest;
-global.WebGLRenderingContext = WebGLRenderingContext;
-global.performance = performance;
-global.canvas = canvas;
-global.self = global;
-
-// 导出模块
-module.exports = {
-  window,
-  document,
-  navigator,
-  XMLHttpRequest,
-  performance
-};
+if (!GameGlobal.__isAdapterInjected) {
+    GameGlobal.__isAdapterInjected = true
+    inject()
+}
