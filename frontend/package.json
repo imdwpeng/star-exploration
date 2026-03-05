@@ -1,0 +1,19 @@
+{
+  "name": "star-exploration",
+  "version": "1.0.0",
+  "description": "星海迷航游戏",
+  "main": "game.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "game",
+    "threejs",
+    "wechat"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "threejs-miniprogram": "latest"
+  }
+}

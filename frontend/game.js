@@ -1,6 +1,8 @@
-// 游戏主入口
-import './libs/three.min.js';
-import Main from './js/main';
+// game.js
+// 引入适配器
+require('./js/weapp-adapter/index.js');
+// 引入主逻辑类
+const Main = require('./js/main.js').default;
 
 // 初始化游戏
 new Main();
