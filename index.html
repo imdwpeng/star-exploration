@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星海迷航 - 游戏核心界面</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0a0a1a;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr auto auto auto;
+            gap: 10px;
+            padding: 10px;
+        }
+        
+        /* 关卡信息 */
+        .level-info {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* 三维星图区域 */
+        .star-map {
+            background-color: rgba(0, 100, 255, 0.2);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .cube-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        #cube-scene {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .block:hover {
+            transform: scale(1.1);
+        }
+        
+        .block.selected {
+            transform: scale(0.8);
+        }
+        
+        /* 待消除槽 */
+        .elimination-slot {
+            background-color: rgba(255, 165, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        
+        .slot {
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .slot.highlight {
+            border-color: #ff0000;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { border-color: #ff0000; }
+            50% { border-color: #ffffff; }
+        }
+        
+        .slot-number {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ff6600;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+        }
+        
+        /* 功能栏 */
+        .function-bars {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .left-function {
+            background-color: rgba(0, 255, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        
+        .right-resource {
+            background-color: rgba(255, 0, 255, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .resource-item {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .skill-slot {
+            width: 100%;
+            height: 30px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .skill-progress {
+            width: 60%;
+            height: 100%;
+            background-color: #00ff00;
+            animation: skillFill 10s linear infinite;
+        }
+        
+        @keyframes skillFill {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        
+        /* 底部快捷操作 */
+        .bottom-actions {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        
+        button {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- 关卡信息 -->
+        <div class="level-info">
+            <div>关卡：星际探索</div>
+            <div>目标：收集10个晶体</div>
+            <div>步数：25/50</div>
+            <div>时间：02:30</div>
+        </div>
+        
+        <!-- 三维星图区域 -->
+        <div class="star-map">
+            <div class="cube-container">
+                <div id="cube-scene"></div>
+            </div>
+        </div>
+        
+        <!-- 待消除槽 -->
+        <div class="elimination-slot">
+            <div class="slot">
+                <div class="slot-number">1</div>
+            </div>
+            <div class="slot">
+                <div class="slot-number">2</div>
+            </div>
+            <div class="slot">
+                <div class="slot-number">3</div>
+            </div>
+            <div class="slot">
+                <div class="slot-number">4</div>
+            </div>
+            <div class="slot">
+                <div class="slot-number">5</div>
+            </div>
+            <div class="slot">
+                <div class="slot-number">6</div>
+            </div>
+            <div class="slot">
+                <div class="slot-number">7</div>
+            </div>
+        </div>
+        
+        <!-- 功能栏 -->
+        <div class="function-bars">
+            <div class="left-function">
+                <button class="control-btn">↑</button>
+                <button class="control-btn">←</button>
+                <button class="control-btn">→</button>
+                <button class="control-btn">↓</button>
+                <button title="提示技能">💡</button>
+                <button title="撤回一步">↩</button>
+                <button title="暂停">⏸</button>
+            </div>
+            <div class="right-resource">
+                <div class="resource-item">
+                    <span>当前能量:</span>
+                    <span>75/100</span>
+                </div>
+                <div class="resource-item">
+                    <span>金属:</span>
+                    <span>12</span>
+                </div>
+                <div class="resource-item">
+                    <span>晶体:</span>
+                    <span>8</span>
+                </div>
+                <div class="resource-item">
+                    <span>生态:</span>
+                    <span>5</span>
+                </div>
+                <div class="skill-slot">
+                    <div class="skill-progress"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部快捷操作 -->
+        <div class="bottom-actions">
+            <button>自动排序</button>
+            <button>高亮图案</button>
+            <button>使用道具</button>
+        </div>
+    </div>
+    
+    <script>
+        // Three.js 魔方实现
+        let scene, camera, renderer, cubeGroup;
+        const blockSize = 25;
+        const gap = 2;
+        const cubeSize = blockSize * 3 + gap * 2;
+        
+        function initThreeJS() {
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a1a);
+            
+            // 创建相机和渲染器
+            const container = document.getElementById('cube-scene');
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            // 调整相机位置，确保整个魔方都能在屏幕中显示
+            camera.position.z = cubeSize * 2;
+            
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            // 创建魔方组
+            cubeGroup = new THREE.Group();
+            scene.add(cubeGroup);
+            
+            // 创建魔方
+            createCube();
+            
+            // 添加灯光
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(1, 1, 1);
+            scene.add(directionalLight);
+            
+            // 动画循环
+            animate();
+            
+            // 响应窗口大小变化
+            window.addEventListener('resize', onWindowResize);
+        }
+        
+        function createCube() {
+            // 定义9种颜色
+            const colors = [
+                0xff0000, // 红色
+                0x00ff00, // 绿色
+                0x0000ff, // 蓝色
+                0xffff00, // 黄色
+                0xff00ff, // 洋红色
+                0x00ffff, // 青色
+                0xffa500, // 橙色
+                0x800080, // 紫色
+                0x008000  // 深绿色
+            ];
+            
+            // 创建颜色数组，每种颜色重复3次
+            let colorArray = [];
+            colors.forEach(color => {
+                for (let i = 0; i < 3; i++) {
+                    colorArray.push(color);
+                }
+            });
+            
+            // 打乱颜色数组
+            colorArray.sort(() => Math.random() - 0.5);
+            
+            // 创建3x3x3的方块
+            let colorIndex = 0;
+            for (let x = -1; x <= 1; x++) {
+                for (let y = -1; y <= 1; y++) {
+                    for (let z = -1; z <= 1; z++) {
+                        const color = colorArray[colorIndex++];
+                        const geometry = new THREE.BoxGeometry(blockSize, blockSize, blockSize);
+                        const material = new THREE.MeshPhongMaterial({ color: color });
+                        
+                        const block = new THREE.Mesh(geometry, material);
+                        block.position.set(
+                            x * (blockSize + gap),
+                            y * (blockSize + gap),
+                            z * (blockSize + gap)
+                        );
+                        
+                        // 存储方块颜色信息
+                        block.userData = {
+                            color: color
+                        };
+                        
+                        cubeGroup.add(block);
+                    }
+                }
+            }
+        }
+        
+        // 鼠标拖动旋转
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        
+        document.getElementById('cube-scene').addEventListener('mousedown', (event) => {
+            isDragging = true;
+            previousMousePosition = { x: event.clientX, y: event.clientY };
+        });
+        
+        document.getElementById('cube-scene').addEventListener('mousemove', (event) => {
+            if (isDragging) {
+                const deltaMove = {
+                    x: event.clientX - previousMousePosition.x,
+                    y: event.clientY - previousMousePosition.y
+                };
+                
+                cubeGroup.rotation.y += deltaMove.x * 0.01;
+                cubeGroup.rotation.x += deltaMove.y * 0.01;
+                
+                previousMousePosition = { x: event.clientX, y: event.clientY };
+            }
+        });
+        
+        document.getElementById('cube-scene').addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+        
+        document.getElementById('cube-scene').addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            renderer.render(scene, camera);
+        }
+        
+        function onWindowResize() {
+            const container = document.getElementById('cube-scene');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+        
+        // 初始化Three.js
+        window.addEventListener('load', initThreeJS);
+        
+        // 鼠标交互
+        let raycaster = new THREE.Raycaster();
+        let mouse = new THREE.Vector2();
+        
+        document.getElementById('cube-scene').addEventListener('click', onMouseClick);
+        
+        function onMouseClick(event) {
+            // 计算鼠标位置
+            const rect = event.target.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            
+            // 发射射线
+            raycaster.setFromCamera(mouse, camera);
+            
+            // 检测碰撞
+            const intersects = raycaster.intersectObjects(cubeGroup.children);
+            
+            if (intersects.length > 0) {
+                const clickedBlock = intersects[0].object;
+                
+                // 高亮效果
+                clickedBlock.material.emissive = new THREE.Color(0xffffff);
+                clickedBlock.material.emissiveIntensity = 0.8;
+                
+                // 延迟移除并添加到槽位
+                setTimeout(() => {
+                    // 从大正方体中移除
+                    cubeGroup.remove(clickedBlock);
+                    
+                    // 添加到待消除槽
+                    addBlockToSlot(clickedBlock);
+                }, 300);
+            }
+        }
+        
+        function addBlockToSlot(block) {
+            const slots = document.querySelectorAll('.slot');
+            
+            // 找到空槽位
+            for (let i = 0; i < slots.length; i++) {
+                if (!slots[i].querySelector('.block')) {
+                    const blockDiv = document.createElement('div');
+                    blockDiv.className = 'block';
+                    blockDiv.style.backgroundColor = '#' + block.userData.color.toString(16).padStart(6, '0');
+                    // 添加放入动画
+                    blockDiv.style.transform = 'scale(0)';
+                    blockDiv.style.width = '100%';
+                    blockDiv.style.height = '100%';
+                    blockDiv.style.borderRadius = '4px';
+                    blockDiv.style.border = '1px solid rgba(255, 255, 255, 0.3)';
+                    slots[i].appendChild(blockDiv);
+                    
+                    // 动画效果
+                    setTimeout(() => {
+                        blockDiv.style.transition = 'transform 0.3s ease';
+                        blockDiv.style.transform = 'scale(1)';
+                    }, 10);
+                    break;
+                }
+            }
+        }
+        
+        // 槽内方块操作
+        const slots = document.querySelectorAll('.slot');
+        slots.forEach(slot => {
+            slot.addEventListener('click', (e) => {
+                if (e.target.classList.contains('block')) {
+                    e.target.remove();
+                }
+            });
+        });
+        
+        // 旋转视角控制
+        const controlBtns = document.querySelectorAll('.control-btn');
+        controlBtns.forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                switch(index) {
+                    case 0: // 上
+                        cubeGroup.rotation.x -= Math.PI / 2;
+                        break;
+                    case 1: // 左
+                        cubeGroup.rotation.y += Math.PI / 2;
+                        break;
+                    case 2: // 右
+                        cubeGroup.rotation.y -= Math.PI / 2;
+                        break;
+                    case 3: // 下
+                        cubeGroup.rotation.x += Math.PI / 2;
+                        break;
+                }
+            });
+        });
+        
+        // 自动消除检测
+        function checkElimination() {
+            const slotBlocks = [];
+            slots.forEach(slot => {
+                const block = slot.querySelector('.block');
+                if (block) {
+                    slotBlocks.push(block.style.backgroundColor);
+                }
+            });
+            
+            // 简单的三连检测
+            for (let i = 0; i < slotBlocks.length - 2; i++) {
+                if (slotBlocks[i] && slotBlocks[i] === slotBlocks[i+1] && slotBlocks[i] === slotBlocks[i+2]) {
+                    // 消除效果
+                    for (let j = i; j <= i+2; j++) {
+                        if (slots[j].querySelector('.block')) {
+                            slots[j].querySelector('.block').remove();
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        
+        // 每2秒检测一次消除
+        setInterval(checkElimination, 2000);
+        
+        // 槽位预警
+        function checkSlotWarning() {
+            let filledSlots = 0;
+            slots.forEach(slot => {
+                if (slot.querySelector('.block')) {
+                    filledSlots++;
+                }
+            });
+            
+            if (filledSlots >= 6) {
+                slots.forEach(slot => {
+                    slot.classList.add('highlight');
+                });
+            } else {
+                slots.forEach(slot => {
+                    slot.classList.remove('highlight');
+                });
+            }
+        }
+        
+        // 每1秒检测一次槽位
+        setInterval(checkSlotWarning, 1000);
+        
+        // 底部快捷操作
+        const bottomButtons = document.querySelectorAll('.bottom-actions button');
+        bottomButtons.forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                switch(index) {
+                    case 0: // 自动排序
+                        alert('自动排序功能');
+                        break;
+                    case 1: // 高亮图案
+                        // 高亮魔方方块
+                        cubeGroup.children.forEach(block => {
+                            block.material.forEach(material => {
+                                material.emissive = new THREE.Color(0xffffff);
+                                material.emissiveIntensity = 0.5;
+                            });
+                        });
+                        setTimeout(() => {
+                            cubeGroup.children.forEach(block => {
+                                block.material.forEach(material => {
+                                    material.emissive = new THREE.Color(0x000000);
+                                    material.emissiveIntensity = 0;
+                                });
+                            });
+                        }, 1000);
+                        break;
+                    case 2: // 使用道具
+                        alert('使用道具功能');
+                        break;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
