@@ -27,6 +27,9 @@ class Main {
       // 5. 初始化场景和相机
       this.initScene();
 
+      // 5.1 初始化 UI 场景
+      this.initUI();
+
       // 6. 初始化游戏管理器
       this.gameManager = new GameManager();
       
@@ -57,6 +60,41 @@ class Main {
     });
     this.renderer.setSize(this.windowWidth, this.windowHeight);
     this.renderer.setPixelRatio(this.pixelRatio);
+    this.renderer.autoClear = false; //以此支持多重渲染
+  }
+  
+  initUI() {
+    // 创建离屏 Canvas 用于 UI
+    this.uiCanvas = wx.createCanvas();
+    // 设置 Canvas 尺寸为物理像素尺寸
+    this.uiCanvas.width = this.windowWidth * this.pixelRatio;
+    this.uiCanvas.height = this.windowHeight * this.pixelRatio;
+    
+    // 创建 UI 场景
+    this.uiScene = new this.THREE.Scene();
+    // 创建正交相机，对应屏幕逻辑尺寸
+    this.uiCamera = new this.THREE.OrthographicCamera(
+      -this.windowWidth / 2, this.windowWidth / 2, 
+      this.windowHeight / 2, -this.windowHeight / 2, 
+      1, 10
+    );
+    this.uiCamera.position.z = 10;
+
+    // 创建 UI 纹理
+    this.uiTexture = new this.THREE.CanvasTexture(this.uiCanvas);
+    this.uiTexture.minFilter = this.THREE.LinearFilter;
+    this.uiTexture.magFilter = this.THREE.LinearFilter;
+    
+    // 创建全屏平面用于显示 UI
+    const material = new this.THREE.MeshBasicMaterial({ 
+      map: this.uiTexture, 
+      transparent: true,
+      depthTest: false, // UI 永远在最上层
+      depthWrite: false
+    });
+    const geometry = new this.THREE.PlaneGeometry(this.windowWidth, this.windowHeight);
+    const mesh = new this.THREE.Mesh(geometry, material);
+    this.uiScene.add(mesh);
   }
   
   initScene() {
@@ -66,7 +104,30 @@ class Main {
     
     // 创建相机
     this.camera = new this.THREE.PerspectiveCamera(75, this.windowWidth / this.windowHeight, 0.1, 1000);
-    this.camera.position.z = 100;
+    
+    // 计算合适的相机距离
+    // 假设魔方最大尺寸约为 85 (3 * 25 + 2 * 2 + 额外空间)
+    const cubeSize = 90;
+    // 视场角的一半转弧度
+    const vFOV = this.camera.fov * Math.PI / 360; 
+    // 根据屏幕宽高比计算水平视场角
+    const aspect = this.windowWidth / this.windowHeight;
+    
+    // 确保魔方在任何屏幕比例下都能完全显示
+    // 并在上下留出 UI 空间 (约占屏幕高度的 40%)
+    let distance;
+    if (aspect < 1) {
+        // 竖屏模式：以宽度为基准，并考虑上下 UI 遮挡
+        // 可视高度减少 40%
+        const visibleHeightRatio = 0.6;
+        distance = (cubeSize / 2) / Math.tan(vFOV) / Math.min(aspect, visibleHeightRatio);
+    } else {
+        // 横屏模式
+        distance = (cubeSize / 2) / Math.tan(vFOV);
+    }
+    
+    this.camera.position.z = distance * 1.5; // 稍微拉远一点，留出操作空间
+    this.camera.lookAt(0, 0, 0);
     
     // 添加灯光
     const ambientLight = new this.THREE.AmbientLight(0xffffff, 0.5);
@@ -221,12 +282,17 @@ class Main {
       }
       
       // 检查是否点击了功能栏按钮
-      if (this.checkFunctionButtons(touch.clientX, touch.clientY)) {
-        return;
-      }
-      
-      // 检查是否点击了魔方方块
-      this.checkClick(mouse);
+    if (this.checkFunctionButtons(touch.clientX, touch.clientY)) {
+      return;
+    }
+    
+    // 检查是否点击了待消除槽
+    if (this.checkEliminationSlots(touch.clientX, touch.clientY)) {
+      return;
+    }
+    
+    // 检查是否点击了魔方方块
+    this.checkClick(mouse);
     }
   }
   
@@ -244,6 +310,11 @@ class Main {
     
     // 检查是否点击了功能栏按钮
     if (this.checkFunctionButtons(event.clientX, event.clientY)) {
+      return;
+    }
+    
+    // 检查是否点击了待消除槽
+    if (this.checkEliminationSlots(event.clientX, event.clientY)) {
       return;
     }
     
@@ -280,7 +351,11 @@ class Main {
     // 检查方向按钮
     const btnSize = 40;
     const btnStartX = 30;
-    const btnStartY = 150;
+    // 重新计算 startY，与 drawFunctionBars 保持一致
+    const barHeight = 80;
+    const startY = this.windowHeight - 60 - 10 - 60 - 10 - barHeight;
+    const btnOffsetY = 10;
+    const btnStartY = startY + btnOffsetY; // 按钮实际起始Y坐标
     
     // 上
     if (x >= btnStartX + btnSize && x <= btnStartX + btnSize * 2 && y >= btnStartY && y <= btnStartY + btnSize) {
@@ -322,6 +397,40 @@ class Main {
     if (x >= btnStartX + btnSize * 4 + 30 && x <= btnStartX + btnSize * 5 + 30 && y >= btnStartY + 25 && y <= btnStartY + 25 + btnSize) {
       this.gameManager.useSkill('pause');
       return true;
+    }
+    
+    return false;
+  }
+  
+  checkEliminationSlots(x, y) {
+    const slotWidth = 60;
+    const slotHeight = 60;
+    const startX = (this.windowWidth - slotWidth * 7 - 10 * 6) / 2;
+    // 调整到底部按钮上方 (底部按钮高50，padding 10，再加上一些间距)
+    const startY = this.windowHeight - 60 - 10 - slotHeight;
+    
+    // 检查是否在Y轴范围内
+    if (y < startY || y > startY + slotHeight) {
+      return false;
+    }
+    
+    // 计算点击的是哪个槽位
+    const relativeX = x - startX;
+    if (relativeX < 0) return false;
+    
+    const index = Math.floor(relativeX / (slotWidth + 10));
+    const offsetInSlot = relativeX % (slotWidth + 10);
+    
+    // 检查是否在槽位内（排除间隙）
+    if (offsetInSlot > slotWidth) return false;
+    
+    // 检查索引是否有效
+    if (index >= 0 && index < 7) {
+      // 如果槽位有方块，则移除
+      if (this.gameManager.eliminationSlots[index].block) {
+        this.gameManager.removeBlockFromSlot(index);
+        return true;
+      }
     }
     
     return false;
@@ -437,9 +546,6 @@ class Main {
     // 更新游戏状态
     this.gameManager.update(delta);
     
-    // 渲染3D场景
-    this.renderer.render(this.scene, this.camera);
-    
     // 绘制2D UI
     this.drawUI();
     
@@ -450,6 +556,14 @@ class Main {
       this.showPause();
     }
     
+    // 渲染3D场景
+    this.renderer.clear();
+    this.renderer.render(this.scene, this.camera);
+    
+    // 渲染 UI 场景
+    this.renderer.clearDepth();
+    this.renderer.render(this.uiScene, this.uiCamera);
+    
     // 请求下一帧
     if (canvas && canvas.requestAnimationFrame) {
       canvas.requestAnimationFrame(this.animate.bind(this));
@@ -459,8 +573,14 @@ class Main {
   }
   
   drawUI() {
-    const ctx = canvas.getContext('2d');
+    const ctx = this.uiCanvas.getContext('2d');
+    
+    // 清除上一帧内容
+    ctx.clearRect(0, 0, this.uiCanvas.width, this.uiCanvas.height);
+    
     ctx.save();
+    // 缩放以匹配逻辑像素
+    ctx.scale(this.pixelRatio, this.pixelRatio);
     
     // 绘制关卡信息
     this.drawLevelInfo(ctx);
@@ -475,6 +595,9 @@ class Main {
     this.drawBottomActions(ctx);
     
     ctx.restore();
+    
+    // 标记纹理需要更新
+    this.uiTexture.needsUpdate = true;
   }
   
   drawLevelInfo(ctx) {
@@ -498,7 +621,8 @@ class Main {
     const slotWidth = 60;
     const slotHeight = 60;
     const startX = (this.windowWidth - slotWidth * 7 - 10 * 6) / 2;
-    const startY = 70;
+    // 调整到底部按钮上方 (底部按钮高50，padding 10，再加上一些间距)
+    const startY = this.windowHeight - 60 - 10 - slotHeight;
     
     for (let i = 0; i < slots.length; i++) {
       const x = startX + i * (slotWidth + 10);
@@ -534,53 +658,66 @@ class Main {
   drawFunctionBars(ctx) {
     const resources = this.gameManager.resources;
     
+    // 调整到待消除槽上方
+    // 待消除槽高度 60，底部按钮高度 60，间隔 10
+    // 所以 startY 大约在 windowHeight - 130 左右往上
+    // 功能栏高度 80
+    const barHeight = 80;
+    const startY = this.windowHeight - 60 - 10 - 60 - 10 - barHeight;
+
     // 左侧功能按钮
     ctx.fillStyle = 'rgba(0, 255, 0, 0.2)';
-    ctx.fillRect(10, 140, this.windowWidth / 2 - 15, 80);
+    ctx.fillRect(10, startY, this.windowWidth / 2 - 15, barHeight);
     
     // 绘制方向按钮
     const btnSize = 40;
     const btnStartX = 30;
-    const btnStartY = 150;
+    // 按钮相对功能栏顶部的偏移
+    const btnOffsetY = 10; 
     
     // 上
-    this.drawControlButton(ctx, btnStartX + btnSize, btnStartY, btnSize, btnSize, '↑');
+    this.drawControlButton(ctx, btnStartX + btnSize, startY + btnOffsetY, btnSize, btnSize, '↑');
     // 左
-    this.drawControlButton(ctx, btnStartX, btnStartY + btnSize, btnSize, btnSize, '←');
+    this.drawControlButton(ctx, btnStartX, startY + btnOffsetY + btnSize, btnSize, btnSize, '←');
     // 右
-    this.drawControlButton(ctx, btnStartX + btnSize * 2, btnStartY + btnSize, btnSize, btnSize, '→');
+    this.drawControlButton(ctx, btnStartX + btnSize * 2, startY + btnOffsetY + btnSize, btnSize, btnSize, '→');
     // 下
-    this.drawControlButton(ctx, btnStartX + btnSize, btnStartY + btnSize * 2, btnSize, btnSize, '↓');
+    this.drawControlButton(ctx, btnStartX + btnSize, startY + btnOffsetY + btnSize * 2, btnSize, btnSize, '↓');
     
     // 绘制技能按钮
-    this.drawButton(ctx, btnStartX + btnSize * 3 + 20, btnStartY, 40, 40, '💡');
-    this.drawButton(ctx, btnStartX + btnSize * 3 + 20, btnStartY + 50, 40, 40, '↩');
-    this.drawButton(ctx, btnStartX + btnSize * 4 + 30, btnStartY + 25, 40, 40, '⏸');
+    // 技能按钮放到右侧或者其他位置，这里暂时先不画或者调整位置
+    // 由于空间有限，我们简化一下布局，只画几个核心按钮
+    // 提示技能
+    this.drawButton(ctx, btnStartX + btnSize * 3 + 20, startY + btnOffsetY, 40, 40, '💡');
+    // 撤回技能
+    this.drawButton(ctx, btnStartX + btnSize * 3 + 20, startY + btnOffsetY + 50, 40, 40, '↩');
+    // 暂停
+    this.drawButton(ctx, btnStartX + btnSize * 4 + 30, startY + btnOffsetY + 25, 40, 40, '⏸');
     
     // 右侧资源栏
     ctx.fillStyle = 'rgba(255, 0, 255, 0.2)';
-    ctx.fillRect(this.windowWidth / 2 + 5, 140, this.windowWidth / 2 - 15, 80);
+    ctx.fillRect(this.windowWidth / 2 + 5, startY, this.windowWidth / 2 - 15, barHeight);
     
     ctx.fillStyle = '#ffffff';
     ctx.font = '14px Arial';
     ctx.textAlign = 'left';
     
-    let y = 155;
-    ctx.fillText(`当前能量: ${resources.energy}/${resources.maxEnergy}`, this.windowWidth / 2 + 20, y);
-    y += 20;
-    ctx.fillText(`金属: ${resources.metal}`, this.windowWidth / 2 + 20, y);
-    y += 20;
-    ctx.fillText(`晶体: ${resources.crystal}`, this.windowWidth / 2 + 20, y);
-    y += 20;
-    ctx.fillText(`生态: ${resources.ecology}`, this.windowWidth / 2 + 20, y);
+    let textY = startY + 15;
+    ctx.fillText(`当前能量: ${resources.energy}/${resources.maxEnergy}`, this.windowWidth / 2 + 20, textY);
+    textY += 20;
+    ctx.fillText(`金属: ${resources.metal}`, this.windowWidth / 2 + 20, textY);
+    textY += 20;
+    ctx.fillText(`晶体: ${resources.crystal}`, this.windowWidth / 2 + 20, textY);
+    textY += 20;
+    ctx.fillText(`生态: ${resources.ecology}`, this.windowWidth / 2 + 20, textY);
     
     // 技能冷却条
     ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-    ctx.fillRect(this.windowWidth / 2 + 20, 200, this.windowWidth / 2 - 35, 10);
+    ctx.fillRect(this.windowWidth / 2 + 20, startY + barHeight - 15, this.windowWidth / 2 - 35, 10);
     
     ctx.fillStyle = '#00ff00';
     const skillProgress = this.gameManager.skillProgress;
-    ctx.fillRect(this.windowWidth / 2 + 20, 200, (this.windowWidth / 2 - 35) * skillProgress, 10);
+    ctx.fillRect(this.windowWidth / 2 + 20, startY + barHeight - 15, (this.windowWidth / 2 - 35) * skillProgress, 10);
   }
   
   drawControlButton(ctx, x, y, width, height, text) {
@@ -629,8 +766,9 @@ class Main {
   }
   
   showGameOver() {
-    const ctx = canvas.getContext('2d');
+    const ctx = this.uiCanvas.getContext('2d');
     ctx.save();
+    ctx.scale(this.pixelRatio, this.pixelRatio);
     
     // 半透明遮罩
     ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
@@ -664,8 +802,9 @@ class Main {
   }
   
   showPause() {
-    const ctx = canvas.getContext('2d');
+    const ctx = this.uiCanvas.getContext('2d');
     ctx.save();
+    ctx.scale(this.pixelRatio, this.pixelRatio);
     
     // 半透明遮罩
     ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';

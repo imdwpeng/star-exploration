@@ -51,6 +51,15 @@ class GameManager {
     return false;
   }
   
+  // 移除槽位中的方块
+  removeBlockFromSlot(index) {
+    if (index >= 0 && index < this.eliminationSlots.length) {
+      this.eliminationSlots[index].block = null;
+      return true;
+    }
+    return false;
+  }
+  
   // 检测消除
   checkElimination() {
     const slotBlocks = [];
