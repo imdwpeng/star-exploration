@@ -37,6 +37,9 @@ class Main {
       this.gameManager.cube = this.cube;
       this.gameManager.THREE = this.THREE;
       
+      // 8. 初始化事件处理
+      this.initEventListeners();
+      
       this.lastTime = Date.now();
       this.animate();
     } else {
@@ -168,6 +171,264 @@ class Main {
     }
   }
   
+
+  
+  initEventListeners() {
+    const canvas = (typeof window !== 'undefined' && window.canvas) ? window.canvas : GameGlobal.screencanvas;
+    
+    // 触摸事件处理
+    this.isDragging = false;
+    this.previousTouchPosition = { x: 0, y: 0 };
+    
+    canvas.addEventListener('touchstart', this.onTouchStart.bind(this));
+    canvas.addEventListener('touchmove', this.onTouchMove.bind(this));
+    canvas.addEventListener('touchend', this.onTouchEnd.bind(this));
+    canvas.addEventListener('touchcancel', this.onTouchEnd.bind(this));
+    
+    // 鼠标事件处理（用于调试）
+    canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
+    canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
+    canvas.addEventListener('mouseup', this.onMouseUp.bind(this));
+    canvas.addEventListener('mouseleave', this.onMouseUp.bind(this));
+    
+    // 点击事件处理
+    canvas.addEventListener('click', this.onClick.bind(this));
+    canvas.addEventListener('touchend', this.onTouchEndClick.bind(this));
+  }
+  
+  onClick(event) {
+    // 计算点击位置
+    const rect = event.target.getBoundingClientRect();
+    const mouse = new this.THREE.Vector2();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    
+    this.checkClick(mouse);
+  }
+  
+  onTouchEndClick(event) {
+    // 只有当不是拖动时才处理点击
+    if (!this.isDragging) {
+      const touch = event.changedTouches[0];
+      const rect = event.target.getBoundingClientRect();
+      const mouse = new this.THREE.Vector2();
+      mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      // 检查是否点击了底部快捷操作按钮
+      if (this.checkBottomActions(touch.clientX, touch.clientY)) {
+        return;
+      }
+      
+      // 检查是否点击了功能栏按钮
+      if (this.checkFunctionButtons(touch.clientX, touch.clientY)) {
+        return;
+      }
+      
+      // 检查是否点击了魔方方块
+      this.checkClick(mouse);
+    }
+  }
+  
+  onClick(event) {
+    // 计算点击位置
+    const rect = event.target.getBoundingClientRect();
+    const mouse = new this.THREE.Vector2();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    
+    // 检查是否点击了底部快捷操作按钮
+    if (this.checkBottomActions(event.clientX, event.clientY)) {
+      return;
+    }
+    
+    // 检查是否点击了功能栏按钮
+    if (this.checkFunctionButtons(event.clientX, event.clientY)) {
+      return;
+    }
+    
+    // 检查是否点击了魔方方块
+    this.checkClick(mouse);
+  }
+  
+  checkBottomActions(x, y) {
+    const btnWidth = (this.windowWidth - 40) / 3;
+    const startY = this.windowHeight - 60;
+    
+    // 自动排序
+    if (x >= 20 && x <= 20 + btnWidth && y >= startY + 10 && y <= startY + 40) {
+      this.gameManager.autoSort();
+      return true;
+    }
+    
+    // 高亮图案
+    if (x >= 20 + btnWidth + 10 && x <= 20 + btnWidth * 2 + 10 && y >= startY + 10 && y <= startY + 40) {
+      this.highlightPatterns();
+      return true;
+    }
+    
+    // 使用道具
+    if (x >= 20 + btnWidth * 2 + 20 && x <= 20 + btnWidth * 3 + 20 && y >= startY + 10 && y <= startY + 40) {
+      this.useItem();
+      return true;
+    }
+    
+    return false;
+  }
+  
+  checkFunctionButtons(x, y) {
+    // 检查方向按钮
+    const btnSize = 40;
+    const btnStartX = 30;
+    const btnStartY = 150;
+    
+    // 上
+    if (x >= btnStartX + btnSize && x <= btnStartX + btnSize * 2 && y >= btnStartY && y <= btnStartY + btnSize) {
+      this.rotate('up');
+      return true;
+    }
+    
+    // 左
+    if (x >= btnStartX && x <= btnStartX + btnSize && y >= btnStartY + btnSize && y <= btnStartY + btnSize * 2) {
+      this.rotate('left');
+      return true;
+    }
+    
+    // 右
+    if (x >= btnStartX + btnSize * 2 && x <= btnStartX + btnSize * 3 && y >= btnStartY + btnSize && y <= btnStartY + btnSize * 2) {
+      this.rotate('right');
+      return true;
+    }
+    
+    // 下
+    if (x >= btnStartX + btnSize && x <= btnStartX + btnSize * 2 && y >= btnStartY + btnSize * 2 && y <= btnStartY + btnSize * 3) {
+      this.rotate('down');
+      return true;
+    }
+    
+    // 提示技能
+    if (x >= btnStartX + btnSize * 3 + 20 && x <= btnStartX + btnSize * 4 + 20 && y >= btnStartY && y <= btnStartY + btnSize) {
+      this.gameManager.useSkill('hint');
+      return true;
+    }
+    
+    // 撤回技能
+    if (x >= btnStartX + btnSize * 3 + 20 && x <= btnStartX + btnSize * 4 + 20 && y >= btnStartY + 50 && y <= btnStartY + 50 + btnSize) {
+      this.gameManager.useSkill('undo');
+      return true;
+    }
+    
+    // 暂停
+    if (x >= btnStartX + btnSize * 4 + 30 && x <= btnStartX + btnSize * 5 + 30 && y >= btnStartY + 25 && y <= btnStartY + 25 + btnSize) {
+      this.gameManager.useSkill('pause');
+      return true;
+    }
+    
+    return false;
+  }
+  
+  highlightPatterns() {
+    // 高亮魔方方块
+    this.cubeGroup.children.forEach(block => {
+      block.material.emissive = new this.THREE.Color(0xffffff);
+      block.material.emissiveIntensity = 0.5;
+    });
+    
+    // 1秒后取消高亮
+    setTimeout(() => {
+      this.cubeGroup.children.forEach(block => {
+        block.material.emissive = new this.THREE.Color(0x000000);
+        block.material.emissiveIntensity = 0;
+      });
+    }, 1000);
+  }
+  
+  useItem() {
+    // 简单的道具选择
+    if (this.gameManager.resources.metal >= 5) {
+      this.gameManager.useItem('bomb');
+    } else if (this.gameManager.resources.ecology >= 3) {
+      this.gameManager.useItem('colorChange');
+    }
+  }
+  
+  checkClick(mouse) {
+    // 创建射线
+    const raycaster = new this.THREE.Raycaster();
+    raycaster.setFromCamera(mouse, this.camera);
+    
+    // 检测碰撞
+    const intersects = raycaster.intersectObjects(this.cubeGroup.children);
+    
+    if (intersects.length > 0) {
+      const clickedBlock = intersects[0].object;
+      
+      // 高亮效果
+      clickedBlock.material.emissive = new this.THREE.Color(0xffffff);
+      clickedBlock.material.emissiveIntensity = 0.8;
+      
+      // 延迟移除并添加到槽位
+      setTimeout(() => {
+        // 从大正方体中移除
+        this.cubeGroup.remove(clickedBlock);
+        
+        // 添加到待消除槽
+        this.gameManager.addBlockToSlot(clickedBlock);
+        
+        // 增加步数
+        this.gameManager.levelInfo.steps++;
+      }, 300);
+    }
+  }
+  
+  onTouchStart(event) {
+    this.isDragging = true;
+    const touch = event.touches[0];
+    this.previousTouchPosition = { x: touch.clientX, y: touch.clientY };
+  }
+  
+  onTouchMove(event) {
+    if (this.isDragging) {
+      const touch = event.touches[0];
+      const deltaMove = {
+        x: touch.clientX - this.previousTouchPosition.x,
+        y: touch.clientY - this.previousTouchPosition.y
+      };
+      
+      this.cubeGroup.rotation.y += deltaMove.x * 0.01;
+      this.cubeGroup.rotation.x += deltaMove.y * 0.01;
+      
+      this.previousTouchPosition = { x: touch.clientX, y: touch.clientY };
+    }
+  }
+  
+  onTouchEnd() {
+    this.isDragging = false;
+  }
+  
+  onMouseDown(event) {
+    this.isDragging = true;
+    this.previousTouchPosition = { x: event.clientX, y: event.clientY };
+  }
+  
+  onMouseMove(event) {
+    if (this.isDragging) {
+      const deltaMove = {
+        x: event.clientX - this.previousTouchPosition.x,
+        y: event.clientY - this.previousTouchPosition.y
+      };
+      
+      this.cubeGroup.rotation.y += deltaMove.x * 0.01;
+      this.cubeGroup.rotation.x += deltaMove.y * 0.01;
+      
+      this.previousTouchPosition = { x: event.clientX, y: event.clientY };
+    }
+  }
+  
+  onMouseUp() {
+    this.isDragging = false;
+  }
+  
   animate() {
     const currentTime = Date.now();
     const delta = currentTime - this.lastTime;
@@ -263,6 +524,9 @@ class Main {
       if (slots[i].block) {
         ctx.fillStyle = slots[i].block.color;
         ctx.fillRect(x + 2, startY + 2, slotWidth - 4, slotHeight - 4);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + 2, startY + 2, slotWidth - 4, slotHeight - 4);
       }
     }
   }
@@ -275,18 +539,23 @@ class Main {
     ctx.fillRect(10, 140, this.windowWidth / 2 - 15, 80);
     
     // 绘制方向按钮
-    const btnSize = 30;
+    const btnSize = 40;
     const btnStartX = 30;
     const btnStartY = 150;
     
     // 上
-    this.drawButton(ctx, btnStartX + btnSize, btnStartY, btnSize, btnSize, '↑');
+    this.drawControlButton(ctx, btnStartX + btnSize, btnStartY, btnSize, btnSize, '↑');
     // 左
-    this.drawButton(ctx, btnStartX, btnStartY + btnSize, btnSize, btnSize, '←');
+    this.drawControlButton(ctx, btnStartX, btnStartY + btnSize, btnSize, btnSize, '←');
     // 右
-    this.drawButton(ctx, btnStartX + btnSize * 2, btnStartY + btnSize, btnSize, btnSize, '→');
+    this.drawControlButton(ctx, btnStartX + btnSize * 2, btnStartY + btnSize, btnSize, btnSize, '→');
     // 下
-    this.drawButton(ctx, btnStartX + btnSize, btnStartY + btnSize * 2, btnSize, btnSize, '↓');
+    this.drawControlButton(ctx, btnStartX + btnSize, btnStartY + btnSize * 2, btnSize, btnSize, '↓');
+    
+    // 绘制技能按钮
+    this.drawButton(ctx, btnStartX + btnSize * 3 + 20, btnStartY, 40, 40, '💡');
+    this.drawButton(ctx, btnStartX + btnSize * 3 + 20, btnStartY + 50, 40, 40, '↩');
+    this.drawButton(ctx, btnStartX + btnSize * 4 + 30, btnStartY + 25, 40, 40, '⏸');
     
     // 右侧资源栏
     ctx.fillStyle = 'rgba(255, 0, 255, 0.2)';
@@ -312,6 +581,25 @@ class Main {
     ctx.fillStyle = '#00ff00';
     const skillProgress = this.gameManager.skillProgress;
     ctx.fillRect(this.windowWidth / 2 + 20, 200, (this.windowWidth / 2 - 35) * skillProgress, 10);
+  }
+  
+  drawControlButton(ctx, x, y, width, height, text) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.beginPath();
+    ctx.arc(x + width / 2, y + height / 2, width / 2, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(x + width / 2, y + height / 2, width / 2, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x + width / 2, y + height / 2);
   }
   
   drawBottomActions(ctx) {
