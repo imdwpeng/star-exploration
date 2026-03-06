@@ -323,24 +323,28 @@ class Main {
   }
   
   checkBottomActions(x, y) {
-    const btnWidth = (this.windowWidth - 40) / 3;
-    const startY = this.windowHeight - 60;
+    const btnWidth = (this.windowWidth - 60) / 3;
+    const btnHeight = 40;
+    const btnY = this.windowHeight - 60;
     
-    // 自动排序
-    if (x >= 20 && x <= 20 + btnWidth && y >= startY + 10 && y <= startY + 40) {
-      this.gameManager.autoSort();
+    // 检查是否在按钮区域
+    if (y < btnY || y > btnY + btnHeight) return false;
+    
+    // 回溯
+    if (x >= 20 && x <= 20 + btnWidth) {
+      this.gameManager.useSkill('undo');
       return true;
     }
     
-    // 高亮图案
-    if (x >= 20 + btnWidth + 10 && x <= 20 + btnWidth * 2 + 10 && y >= startY + 10 && y <= startY + 40) {
-      this.highlightPatterns();
+    // 扫描
+    if (x >= 20 + btnWidth + 10 && x <= 20 + btnWidth * 2 + 10) {
+      this.gameManager.useSkill('scan');
       return true;
     }
     
-    // 使用道具
-    if (x >= 20 + btnWidth * 2 + 20 && x <= 20 + btnWidth * 3 + 20 && y >= startY + 10 && y <= startY + 40) {
-      this.useItem();
+    // 重组
+    if (x >= 20 + btnWidth * 2 + 20 && x <= 20 + btnWidth * 3 + 20) {
+      this.gameManager.useSkill('shuffle');
       return true;
     }
     
@@ -351,10 +355,11 @@ class Main {
     // 检查方向按钮
     const btnSize = 40;
     const btnStartX = 30;
-    // 重新计算 startY，与 drawFunctionBars 保持一致
-    const barHeight = 80;
-    const startY = this.windowHeight - 60 - 10 - 60 - 10 - barHeight;
-    const btnOffsetY = 10;
+    // 重新计算 startY
+    const slotHeight = 40;
+    const startY = this.windowHeight - 80 - 10 - slotHeight - 10 - 60; // 在待消除槽上方
+    
+    const btnOffsetY = 0;
     const btnStartY = startY + btnOffsetY; // 按钮实际起始Y坐标
     
     // 上
@@ -381,33 +386,20 @@ class Main {
       return true;
     }
     
-    // 提示技能
-    if (x >= btnStartX + btnSize * 3 + 20 && x <= btnStartX + btnSize * 4 + 20 && y >= btnStartY && y <= btnStartY + btnSize) {
-      this.gameManager.useSkill('hint');
-      return true;
-    }
-    
-    // 撤回技能
-    if (x >= btnStartX + btnSize * 3 + 20 && x <= btnStartX + btnSize * 4 + 20 && y >= btnStartY + 50 && y <= btnStartY + 50 + btnSize) {
-      this.gameManager.useSkill('undo');
-      return true;
-    }
-    
-    // 暂停
-    if (x >= btnStartX + btnSize * 4 + 30 && x <= btnStartX + btnSize * 5 + 30 && y >= btnStartY + 25 && y <= btnStartY + 25 + btnSize) {
-      this.gameManager.useSkill('pause');
-      return true;
-    }
+    // 技能按钮已移除或移到底部，这里不再处理
     
     return false;
   }
   
   checkEliminationSlots(x, y) {
-    const slotWidth = 60;
-    const slotHeight = 60;
-    const startX = (this.windowWidth - slotWidth * 7 - 10 * 6) / 2;
-    // 调整到底部按钮上方 (底部按钮高50，padding 10，再加上一些间距)
-    const startY = this.windowHeight - 60 - 10 - slotHeight;
+    const slots = this.gameManager.eliminationSlots;
+    const slotWidth = 40; // 缩小一点以放下8个
+    const slotHeight = 40;
+    const gap = 5;
+    const totalWidth = slots.length * slotWidth + (slots.length - 1) * gap;
+    const startX = (this.windowWidth - totalWidth) / 2;
+    // 调整到底部按钮上方
+    const startY = this.windowHeight - 80 - 10 - slotHeight;
     
     // 检查是否在Y轴范围内
     if (y < startY || y > startY + slotHeight) {
@@ -418,14 +410,14 @@ class Main {
     const relativeX = x - startX;
     if (relativeX < 0) return false;
     
-    const index = Math.floor(relativeX / (slotWidth + 10));
-    const offsetInSlot = relativeX % (slotWidth + 10);
+    const index = Math.floor(relativeX / (slotWidth + gap));
+    const offsetInSlot = relativeX % (slotWidth + gap);
     
     // 检查是否在槽位内（排除间隙）
     if (offsetInSlot > slotWidth) return false;
     
     // 检查索引是否有效
-    if (index >= 0 && index < 7) {
+    if (index >= 0 && index < slots.length) {
       // 如果槽位有方块，则移除
       if (this.gameManager.eliminationSlots[index].block) {
         this.gameManager.removeBlockFromSlot(index);
@@ -582,14 +574,14 @@ class Main {
     // 缩放以匹配逻辑像素
     ctx.scale(this.pixelRatio, this.pixelRatio);
     
-    // 绘制关卡信息
-    this.drawLevelInfo(ctx);
+    // 绘制顶部资源栏
+    this.drawTopBar(ctx);
+    
+    // 绘制倒计时进度条
+    this.drawCountdownBar(ctx);
     
     // 绘制待消除槽
     this.drawEliminationSlots(ctx);
-    
-    // 绘制功能栏
-    this.drawFunctionBars(ctx);
     
     // 绘制底部快捷操作
     this.drawBottomActions(ctx);
@@ -598,6 +590,54 @@ class Main {
     
     // 标记纹理需要更新
     this.uiTexture.needsUpdate = true;
+  }
+  
+  drawTopBar(ctx) {
+    const resources = this.gameManager.resources;
+    const levelInfo = this.gameManager.levelInfo;
+    
+    // 背景
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(0, 0, this.windowWidth, 60);
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    
+    // 第一行：关卡名 | 能量
+    ctx.fillText(`${levelInfo.level} | 能量: ${Math.floor(resources.energy)}`, 10, 20);
+    
+    // 第二行：资源收集
+    ctx.fillText(`金属: ${resources.metal} | 晶体: ${resources.crystal} | 生态: ${resources.ecology}`, 10, 45);
+  }
+  
+  drawCountdownBar(ctx) {
+    const { countdown, maxCountdown } = this.gameManager;
+    const progress = countdown / maxCountdown;
+    
+    // 位置：待消除槽上方
+    const slotHeight = 60;
+    const bottomBarHeight = 80;
+    const barY = this.windowHeight - 60 - 10 - slotHeight - 15; // 倒计时条 Y 坐标
+    
+    // 绘制背景槽
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.fillRect(20, barY, this.windowWidth - 40, 8);
+    
+    // 绘制进度
+    // 颜色随时间变化：绿色 -> 黄色 -> 红色
+    if (progress > 0.5) ctx.fillStyle = '#00ff00';
+    else if (progress > 0.2) ctx.fillStyle = '#ffff00';
+    else ctx.fillStyle = '#ff0000';
+    
+    ctx.fillRect(20, barY, (this.windowWidth - 40) * progress, 8);
+    
+    // 绘制文字
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${Math.ceil(countdown)}s`, this.windowWidth / 2, barY - 8);
   }
   
   drawLevelInfo(ctx) {
@@ -618,31 +658,21 @@ class Main {
   
   drawEliminationSlots(ctx) {
     const slots = this.gameManager.eliminationSlots;
-    const slotWidth = 60;
-    const slotHeight = 60;
-    const startX = (this.windowWidth - slotWidth * 7 - 10 * 6) / 2;
-    // 调整到底部按钮上方 (底部按钮高50，padding 10，再加上一些间距)
-    const startY = this.windowHeight - 60 - 10 - slotHeight;
+    const slotWidth = 40; // 缩小一点以放下8个
+    const slotHeight = 40;
+    const gap = 5;
+    const totalWidth = slots.length * slotWidth + (slots.length - 1) * gap;
+    const startX = (this.windowWidth - totalWidth) / 2;
+    // 调整到底部按钮上方
+    const startY = this.windowHeight - 80 - 10 - slotHeight;
     
     for (let i = 0; i < slots.length; i++) {
-      const x = startX + i * (slotWidth + 10);
+      const x = startX + i * (slotWidth + gap);
       
       // 绘制槽位边框
       ctx.strokeStyle = slots[i].highlight ? '#ff0000' : 'rgba(255, 255, 255, 0.5)';
       ctx.lineWidth = 2;
       ctx.strokeRect(x, startY, slotWidth, slotHeight);
-      
-      // 绘制槽位编号
-      ctx.fillStyle = '#ff6600';
-      ctx.beginPath();
-      ctx.arc(x + slotWidth - 10, startY + 10, 10, 0, Math.PI * 2);
-      ctx.fill();
-      
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '12px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(i + 1, x + slotWidth - 10, startY + 10);
       
       // 绘制槽位中的方块
       if (slots[i].block) {
@@ -656,24 +686,19 @@ class Main {
   }
   
   drawFunctionBars(ctx) {
-    const resources = this.gameManager.resources;
-    
-    // 调整到待消除槽上方
-    // 待消除槽高度 60，底部按钮高度 60，间隔 10
-    // 所以 startY 大约在 windowHeight - 130 左右往上
-    // 功能栏高度 80
-    const barHeight = 80;
-    const startY = this.windowHeight - 60 - 10 - 60 - 10 - barHeight;
-
-    // 左侧功能按钮
-    ctx.fillStyle = 'rgba(0, 255, 0, 0.2)';
-    ctx.fillRect(10, startY, this.windowWidth / 2 - 15, barHeight);
-    
-    // 绘制方向按钮
+    // 绘制方向按钮 (仅保留方向控制)
     const btnSize = 40;
     const btnStartX = 30;
-    // 按钮相对功能栏顶部的偏移
-    const btnOffsetY = 10; 
+    // 待消除槽高度 40，底部按钮高度 60，间隔 10
+    // 倒计时条高度 8，间隔 15
+    // startY 在倒计时条上方
+    const slotHeight = 40;
+    const startY = this.windowHeight - 80 - 10 - slotHeight - 10 - 60; // 调整位置
+    
+    ctx.fillStyle = 'rgba(0, 255, 0, 0.1)';
+    ctx.fillRect(10, startY, 150, 60);
+    
+    const btnOffsetY = 10;
     
     // 上
     this.drawControlButton(ctx, btnStartX + btnSize, startY + btnOffsetY, btnSize, btnSize, '↑');
@@ -683,41 +708,6 @@ class Main {
     this.drawControlButton(ctx, btnStartX + btnSize * 2, startY + btnOffsetY + btnSize, btnSize, btnSize, '→');
     // 下
     this.drawControlButton(ctx, btnStartX + btnSize, startY + btnOffsetY + btnSize * 2, btnSize, btnSize, '↓');
-    
-    // 绘制技能按钮
-    // 技能按钮放到右侧或者其他位置，这里暂时先不画或者调整位置
-    // 由于空间有限，我们简化一下布局，只画几个核心按钮
-    // 提示技能
-    this.drawButton(ctx, btnStartX + btnSize * 3 + 20, startY + btnOffsetY, 40, 40, '💡');
-    // 撤回技能
-    this.drawButton(ctx, btnStartX + btnSize * 3 + 20, startY + btnOffsetY + 50, 40, 40, '↩');
-    // 暂停
-    this.drawButton(ctx, btnStartX + btnSize * 4 + 30, startY + btnOffsetY + 25, 40, 40, '⏸');
-    
-    // 右侧资源栏
-    ctx.fillStyle = 'rgba(255, 0, 255, 0.2)';
-    ctx.fillRect(this.windowWidth / 2 + 5, startY, this.windowWidth / 2 - 15, barHeight);
-    
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '14px Arial';
-    ctx.textAlign = 'left';
-    
-    let textY = startY + 15;
-    ctx.fillText(`当前能量: ${resources.energy}/${resources.maxEnergy}`, this.windowWidth / 2 + 20, textY);
-    textY += 20;
-    ctx.fillText(`金属: ${resources.metal}`, this.windowWidth / 2 + 20, textY);
-    textY += 20;
-    ctx.fillText(`晶体: ${resources.crystal}`, this.windowWidth / 2 + 20, textY);
-    textY += 20;
-    ctx.fillText(`生态: ${resources.ecology}`, this.windowWidth / 2 + 20, textY);
-    
-    // 技能冷却条
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-    ctx.fillRect(this.windowWidth / 2 + 20, startY + barHeight - 15, this.windowWidth / 2 - 35, 10);
-    
-    ctx.fillStyle = '#00ff00';
-    const skillProgress = this.gameManager.skillProgress;
-    ctx.fillRect(this.windowWidth / 2 + 20, startY + barHeight - 15, (this.windowWidth / 2 - 35) * skillProgress, 10);
   }
   
   drawControlButton(ctx, x, y, width, height, text) {
@@ -741,28 +731,44 @@ class Main {
   
   drawBottomActions(ctx) {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-    ctx.fillRect(10, this.windowHeight - 60, this.windowWidth - 20, 50);
+    ctx.fillRect(10, this.windowHeight - 70, this.windowWidth - 20, 60);
     
-    const btnWidth = (this.windowWidth - 40) / 3;
+    const btnWidth = (this.windowWidth - 60) / 3;
+    const btnHeight = 40;
+    const btnY = this.windowHeight - 60;
     
-    this.drawButton(ctx, 20, this.windowHeight - 50, btnWidth, 30, '自动排序');
-    this.drawButton(ctx, 20 + btnWidth + 10, this.windowHeight - 50, btnWidth, 30, '高亮图案');
-    this.drawButton(ctx, 20 + btnWidth * 2 + 20, this.windowHeight - 50, btnWidth, 30, '使用道具');
+    this.drawButton(ctx, 20, btnY, btnWidth, btnHeight, '回溯');
+    this.drawButton(ctx, 20 + btnWidth + 10, btnY, btnWidth, btnHeight, '扫描');
+    this.drawButton(ctx, 20 + btnWidth * 2 + 20, btnY, btnWidth, btnHeight, '重组');
   }
   
-  drawButton(ctx, x, y, width, height, text) {
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-    ctx.fillRect(x, y, width, height);
+  checkBottomActions(x, y) {
+    const btnWidth = (this.windowWidth - 60) / 3;
+    const btnHeight = 40;
+    const btnY = this.windowHeight - 60;
     
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x, y, width, height);
+    // 检查是否在按钮区域
+    if (y < btnY || y > btnY + btnHeight) return false;
     
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '14px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, x + width / 2, y + height / 2);
+    // 回溯
+    if (x >= 20 && x <= 20 + btnWidth) {
+      this.gameManager.useSkill('undo');
+      return true;
+    }
+    
+    // 扫描
+    if (x >= 20 + btnWidth + 10 && x <= 20 + btnWidth * 2 + 10) {
+      this.gameManager.useSkill('scan');
+      return true;
+    }
+    
+    // 重组
+    if (x >= 20 + btnWidth * 2 + 20 && x <= 20 + btnWidth * 3 + 20) {
+      this.gameManager.useSkill('shuffle');
+      return true;
+    }
+    
+    return false;
   }
   
   showGameOver() {
