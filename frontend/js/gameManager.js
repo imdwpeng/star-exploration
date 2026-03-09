@@ -5,18 +5,16 @@ class GameManager {
     this.levelInfo = {
       level: '星际探索',
       target: '收集10个晶体',
-      steps: 25,
-      maxSteps: 50,
       time: '02:30'
     };
     
     // 资源信息
     this.resources = {
-      energy: 75,
+      energy: 0,
       maxEnergy: 100,
-      metal: 12,
-      crystal: 8,
-      ecology: 5
+      metal: 0,
+      crystal: 0,
+      ecology: 0
     };
     
     // 待消除槽 (改为8个)
@@ -39,28 +37,38 @@ class GameManager {
   
   // 添加方块到槽位
   addBlockToSlot(block) {
-    // 记录操作用于回溯
+    // 1. 查找空槽位
+    let slotIndex = -1;
+    for (let i = 0; i < this.eliminationSlots.length; i++) {
+      if (!this.eliminationSlots[i].block) {
+        slotIndex = i;
+        break;
+      }
+    }
+
+    if (slotIndex === -1) return -1;
+
+    // 2. 记录操作用于回溯 (包含槽位索引)
     this.history.push({
       type: 'addBlock',
+      slotIndex: slotIndex,
       blockData: {
         color: block.userData.color,
-        originalPosition: block.userData.position
+        originalPosition: block.userData.position,
+        originalBlock: block
       }
     });
 
     // 场上图案奖励检测 (在移除前检测)
     this.checkPatternReward(block);
     
-    for (let i = 0; i < this.eliminationSlots.length; i++) {
-      if (!this.eliminationSlots[i].block) {
-        this.eliminationSlots[i].block = {
-          color: '#' + block.userData.color.toString(16).padStart(6, '0'),
-          originalBlock: block // 保存原始引用以便后续可能的恢复
-        };
-        return true;
-      }
-    }
-    return false;
+    this.eliminationSlots[slotIndex].block = {
+      color: '#' + block.userData.color.toString(16).padStart(6, '0'),
+      originalBlock: block, // 保存原始引用以便后续可能的恢复
+      visible: false // 初始不可见，等待动画结束
+    };
+    
+    return slotIndex;
   }
   
   // 检测场上图案奖励
@@ -230,48 +238,115 @@ class GameManager {
   removeBlockFromSlot(index) {
     if (index >= 0 && index < this.eliminationSlots.length) {
       this.eliminationSlots[index].block = null;
+      // 移除后立即整理，防止产生空隙导致消除逻辑错误
+      this.compactSlots();
       return true;
     }
     return false;
   }
   
   // 检测消除
-  checkElimination() {
+  checkElimination(deltaTime) {
+    // 检查是否有3个相同颜色的方块
     const slotBlocks = [];
     this.eliminationSlots.forEach(slot => {
-      if (slot.block) {
+      // 只有可见（已到达）的方块才参与消除判定
+      if (slot.block && slot.block.visible !== false) {
         slotBlocks.push(slot.block.color);
+      } else {
+        slotBlocks.push(null); // 未到达或空槽位视为 null
       }
     });
     
-    // 简单的三连检测
-    for (let i = 0; i < slotBlocks.length - 2; i++) {
+    // 遍历检查是否有连续3个相同颜色
+    // 注意：这里假设 compactSlots 已经保证了方块是紧凑排列的
+    // 如果没有 compactSlots，逻辑会更复杂
+    for (let i = 0; i <= slotBlocks.length - 3; i++) {
       if (slotBlocks[i] && slotBlocks[i] === slotBlocks[i+1] && slotBlocks[i] === slotBlocks[i+2]) {
-        // 消除效果
-        for (let j = i; j <= i+2; j++) {
-          if (this.eliminationSlots[j].block) {
-            this.eliminationSlots[j].block = null;
-          }
+        // 找到3个相同颜色
+        
+        // 触发消除前的闪烁高亮
+        // 我们给这些槽位标记一个 highlightElimination 属性，并设置一个短暂的计时器
+        if (!this.eliminationSlots[i].highlightElimination) {
+            // 开始闪烁
+            const highlightDuration = 100; // 0.1s 闪烁
+            this.eliminationSlots[i].highlightElimination = true;
+            this.eliminationSlots[i+1].highlightElimination = true;
+            this.eliminationSlots[i+2].highlightElimination = true;
+            
+            // 记录定时器，以便在撤销时取消
+            this.eliminationTimer = setTimeout(() => {
+                this.performElimination(i);
+                this.eliminationTimer = null;
+            }, highlightDuration);
+            
+            // 返回等待消除状态，告知主循环暂停其他操作（可选）
+            return { eliminated: false, waitingForElimination: true };
         }
         
-        // 整理槽位 (冒泡填补空缺)
-        this.compactSlots();
-        
-        // 增加倒计时 (规则：增加倒计时)
-        this.countdown = Math.min(this.countdown + 5, this.maxCountdown);
-        
-        // 增加能量 (规则：补充基础能量)
-        this.resources.energy = Math.min(this.resources.energy + 10, this.resources.maxEnergy);
-        
-        // 消除发生，清空回溯历史 (防止状态不一致)
-        this.history = [];
-        
-        return true;
+        // 如果已经在闪烁中，则等待
+        return { eliminated: false, waitingForElimination: true };
       }
     }
-    return false;
+    return { eliminated: false };
   }
   
+  performElimination(startIndex) {
+      // 执行真正的消除
+      // 增加安全检查：确保 startIndex 处的方块依然存在（可能被回溯移除了）
+      if (!this.eliminationSlots[startIndex] || !this.eliminationSlots[startIndex].block) {
+          this.eliminationSlots.forEach(slot => slot.highlightElimination = false);
+          return;
+      }
+      
+      const color = this.eliminationSlots[startIndex].block.color;
+      
+      this.removeBlockFromSlot(startIndex);
+      this.removeBlockFromSlot(startIndex); // 再次移除当前位置（因为后面的补上来了）
+      this.removeBlockFromSlot(startIndex);
+      
+      // 清除高亮标记
+      this.eliminationSlots[startIndex].highlightElimination = false;
+      // 注意：由于 removeBlockFromSlot 会调用 compactSlots，索引可能会变
+      // 但这里我们已经移除了三个，compactSlots 会自动处理剩下的
+      // 只需要确保所有槽位的高亮标记都被重置（或者只重置被消除的，但这里它们已经没了）
+      // 为了安全，重置所有
+      this.eliminationSlots.forEach(slot => slot.highlightElimination = false);
+      
+      // 增加倒计时 (规则：增加倒计时)
+      this.countdown = Math.min(this.countdown + 5, this.maxCountdown);
+      
+      // 增加能量 (规则：补充基础能量)
+      this.resources.energy = Math.min(this.resources.energy + 10, this.resources.maxEnergy);
+      
+      // 消除发生，清空回溯历史 (防止状态不一致)
+      this.history = [];
+      
+      // 通知主循环播放特效（这里通过回调或者事件，简单起见我们设置一个标志位供主循环下一帧读取，或者直接返回）
+      // 但由于这是在 setTimeout 中执行的，无法直接返回值给 update
+      // 我们可以在 GameManager 中存储一个 "最近一次消除信息"
+      this.lastEliminationInfo = { eliminated: true, indices: [startIndex, startIndex+1, startIndex+2], color: color };
+  }
+  
+  // 整理槽位 (冒泡填补空缺)
+  compactSlots() {
+    const slots = this.eliminationSlots;
+    const filledSlots = [];
+    
+    // 收集所有非空方块
+    for (let i = 0; i < slots.length; i++) {
+      if (slots[i].block) {
+        filledSlots.push(slots[i].block);
+        slots[i].block = null;
+      }
+    }
+    
+    // 重新填入
+    for (let i = 0; i < filledSlots.length; i++) {
+      slots[i].block = filledSlots[i];
+    }
+  }
+
   // 检测槽位预警
   checkSlotWarning() {
     let filledSlots = 0;
@@ -323,54 +398,40 @@ class GameManager {
       if (!action) return;
       
       if (action.type === 'addBlock') {
-          // 1. 从槽位中移除方块
-          // 需要找到对应的槽位 (这里有点麻烦，因为没有记录 slotIndex)
-          // 但我们可以根据颜色和 originalBlock 引用来找
-          // 或者简单的策略：从后往前找第一个非空的？
-          // 更准确的是：在 addBlockToSlot 时记录 slotIndex
-          
-          // 遍历槽位找到对应的 block
-          let targetSlotIndex = -1;
-          for (let i = 0; i < this.eliminationSlots.length; i++) {
-              if (this.eliminationSlots[i].block && 
-                  this.eliminationSlots[i].block.originalBlock === action.blockData.originalBlock) { // 需要在 history 中保存引用吗？
-                  // 注意：history 中保存的是 blockData，没有直接保存 originalBlock 引用
-                  // 我们需要一种方式关联。
-                  // 简单的做法：撤销最近一次放入的方块。
-                  // 实际上消除游戏的撤销通常是撤销“最近一次操作”，如果发生了消除，可能无法撤销。
-                  // 这里假设没有发生消除才能撤销，或者发生消除后 history 会被清空？
-                  // 简化处理：倒序查找第一个非空槽位，假设就是刚才放入的。
-                  // 实际上应该记录 slotIndex。
-              }
+          // 1. 如果有待触发的消除，先取消它 (因为回溯破坏了消除条件)
+          if (this.eliminationTimer) {
+              clearTimeout(this.eliminationTimer);
+              this.eliminationTimer = null;
+              this.eliminationSlots.forEach(slot => slot.highlightElimination = false);
           }
-          
-          // 重新实现：查找最后放入的一个方块
-          // 实际上如果发生了消除，history 应该怎么处理？
-          // 如果消除了，那几个方块已经没了，撤销变得很复杂。
-          // 简化规则：一旦发生消除，清空 history，无法回溯。
-          // 在 checkElimination 中清空 history。
-          
-          // 找到最后一个非空槽位（假设玩家是顺序放入的，或者按照某种逻辑）
-          // 由于我们有 autoCompact，方块总是靠左。
-          // 所以找最右边的方块。
-          let lastSlotIndex = -1;
-          for (let i = this.eliminationSlots.length - 1; i >= 0; i--) {
-              if (this.eliminationSlots[i].block) {
-                  lastSlotIndex = i;
-                  break;
-              }
-          }
-          
-          if (lastSlotIndex >= 0) {
-              const slotBlock = this.eliminationSlots[lastSlotIndex].block;
-              this.eliminationSlots[lastSlotIndex].block = null;
+
+          // 2. 根据记录的 slotIndex 查找方块
+          // 如果该位置为空，说明可能已经发生了消除 (理论上 history 应该在消除时清空)
+          const slotIndex = action.slotIndex;
+          if (slotIndex !== undefined && this.eliminationSlots[slotIndex].block) {
+              const slotBlock = this.eliminationSlots[slotIndex].block;
+              this.eliminationSlots[slotIndex].block = null;
               
-              // 恢复到场景中
+              // 3. 整理槽位 (由于我们移除了一个中间的或最后的，需要重新对齐)
+              this.compactSlots();
+              
+              // 4. 恢复到场景中
               if (slotBlock.originalBlock) {
                   this.cube.cubeGroup.add(slotBlock.originalBlock);
-                  // 恢复位置和缩放 (addBlockToSlot 时可能有动画改变了它)
-                  // 需要确保 originalBlock 的状态是正确的
+                  // 恢复原始状态
                   slotBlock.originalBlock.scale.set(1, 1, 1);
+                  slotBlock.originalBlock.visible = true;
+                  // 恢复原始发光颜色和强度 (参考 createCube 中的设置)
+                  const originalColor = slotBlock.originalBlock.userData.color;
+                  if (Array.isArray(slotBlock.originalBlock.material)) {
+                      slotBlock.originalBlock.material.forEach(m => {
+                          m.emissive.setHex(originalColor);
+                          m.emissiveIntensity = 0.5;
+                      });
+                  } else {
+                      slotBlock.originalBlock.material.emissive.setHex(originalColor);
+                      slotBlock.originalBlock.material.emissiveIntensity = 0.5;
+                  }
               }
           }
       }
@@ -430,23 +491,41 @@ class GameManager {
       if (!this.cube || !this.cube.cubeGroup) return;
       const activeBlocks = this.cube.cubeGroup.children;
       
-      // 收集所有颜色
-      const colors = activeBlocks.map(block => block.userData.color);
+      // 1. 收集所有方块的原始属性 (类型和颜色)
+      const properties = activeBlocks.map(block => ({
+          type: block.userData.type,
+          color: block.userData.color
+      }));
       
-      // 洗牌
-      for (let i = colors.length - 1; i > 0; i--) {
+      // 2. 随机洗牌属性数组
+      for (let i = properties.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
-          [colors[i], colors[j]] = [colors[j], colors[i]];
+          [properties[i], properties[j]] = [properties[j], properties[i]];
       }
       
-      // 重新赋值
+      // 3. 将洗牌后的属性重新应用到场上所有的方块
       activeBlocks.forEach((block, index) => {
-          const newColor = colors[index];
-          block.userData.color = newColor;
-          if (Array.isArray(block.material)) {
-               block.material.forEach(m => m.color.setHex(newColor));
-          } else {
-               block.material.color.setHex(newColor);
+          const newProp = properties[index];
+          
+          // 更新逻辑数据
+          block.userData.type = newProp.type;
+          block.userData.color = newProp.color;
+          
+          // 更新视觉表现 (材质)
+          // 这里的 Main.js 实例已经通过 this.cube 传入，可以直接访问其 textureCache
+          // 注意：GameManager 本身没有 textureCache，它在 Main 实例中
+          if (block.material) {
+              const materials = Array.isArray(block.material) ? block.material : [block.material];
+              materials.forEach(m => {
+                  // 更新纹理 (从 Main 实例的 textureCache 中获取)
+                  if (this.cube.textureCache && this.cube.textureCache[newProp.type]) {
+                      m.map = this.cube.textureCache[newProp.type];
+                      m.needsUpdate = true;
+                  }
+                  // 更新发光颜色
+                  m.emissive.setHex(newProp.color);
+                  m.emissiveIntensity = 0.5;
+              });
           }
       });
   }
@@ -507,33 +586,97 @@ class GameManager {
     if (this.resources.crystal >= 10) {
       // 达成目标
       this.isGameOver = true;
+      this.isVictory = true; // 标记为胜利
       return true;
     }
     
-    if (this.levelInfo.steps >= this.levelInfo.maxSteps) {
-      // 步数用尽
-      this.isGameOver = true;
-      return true;
+    // 检查是否所有方块都已消除（胜利条件）
+    // 1. 检查场景中是否还有方块
+    let hasBlocksInScene = false;
+    if (this.cube && this.cube.cubeGroup && this.cube.cubeGroup.children.length > 0) {
+        hasBlocksInScene = true;
+    }
+    
+    // 2. 检查消除槽中是否还有方块
+    let hasBlocksInSlots = false;
+    this.eliminationSlots.forEach(slot => {
+        if (slot.block) {
+            hasBlocksInSlots = true;
+        }
+    });
+    
+    // 如果场景和槽位都空了，且没有正在飞行的方块（这里简化判断，槽位空即无飞行，因为addBlockToSlot会先占位）
+    // 实际上 flyingBlocks 在 main.js 中维护，gameManager 无法直接访问，
+    // 但 addBlockToSlot 会立即在 slots 中占位，所以只要 slots 空了，就说明没有飞行方块或者都消除了。
+    if (!hasBlocksInScene && !hasBlocksInSlots) {
+        this.isGameOver = true;
+        this.isVictory = true; // 标记为胜利
+        return true;
+    }
+    
+    if (this.countdown <= 0) {
+        // 倒计时结束
+        this.isGameOver = true;
+        return true;
+    }
+
+    // 检查卡槽是否已满且没有可消除的
+    let filledSlots = 0;
+    let hasFlyingBlocks = false; // 是否有正在飞行的方块
+    
+    this.eliminationSlots.forEach(slot => {
+      if (slot.block) {
+        filledSlots++;
+        // 如果方块还没显示(正在飞行中)，则不应该触发失败判定
+        if (slot.block.visible === false) {
+          hasFlyingBlocks = true;
+        }
+      }
+    });
+
+    // 如果有方块还在飞行，暂时不判负，等待飞行结束进行消除判定
+    if (hasFlyingBlocks) {
+      return false;
+    }
+
+    if (filledSlots >= this.eliminationSlots.length) {
+        // 再次确认没有可消除的 (理论上 checkElimination 会在 update 中先调用)
+        // 但为了保险，可以检查一下
+        // 如果已满且没有发生消除，则游戏结束
+        this.isGameOver = true;
+        return true;
     }
     
     return false;
   }
   
   // 更新游戏状态
-  update(delta) {
-    if (this.isPaused || this.isGameOver) return;
-    
-    // 更新技能进度
-    this.updateSkillProgress(delta * 0.01);
-    
-    // 检测消除
-    this.checkElimination();
-    
-    // 检测槽位预警
-    this.checkSlotWarning();
-    
-    // 检查游戏结束
-    this.checkGameOver();
+  update(deltaTime) {
+      if (this.isPaused || this.isGameOver) return { eliminated: false };
+      
+      // 检查是否需要返回上次的消除信息
+      if (this.lastEliminationInfo) {
+          const info = this.lastEliminationInfo;
+          this.lastEliminationInfo = null;
+          return info;
+      }
+      
+      // 更新技能进度
+      this.updateSkillProgress(deltaTime * 0.01);
+      
+      // 更新倒计时 (delta 是毫秒)
+      this.countdown = Math.max(0, this.countdown - deltaTime / 1000);
+      
+      // 检测消除
+      const eliminationInfo = this.checkElimination(deltaTime);
+      
+      // 检测槽位预警
+      this.checkSlotWarning();
+      
+      // 检查游戏结束
+      this.checkGameOver();
+      
+      return eliminationInfo;
   }
 }
 
