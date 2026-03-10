@@ -1,11 +1,22 @@
 // 游戏状态管理
 class GameManager {
-  constructor() {
+  constructor(levelConfig) {
+    // 默认配置
+    const defaultConfig = {
+      name: '星际探索',
+      target: '收集10个晶体',
+      timeLimit: 150,
+      galaxyName: '新星摇篮'
+    };
+    
+    // 合并配置
+    this.levelConfig = levelConfig || defaultConfig;
+    
     // 关卡信息
     this.levelInfo = {
-      level: '星际探索',
-      target: '收集10个晶体',
-      time: '02:30'
+      level: `${this.levelConfig.galaxyName} - ${this.levelConfig.name}`,
+      target: this.levelConfig.target,
+      time: this.levelConfig.timeLimit > 0 ? `${Math.floor(this.levelConfig.timeLimit / 60)}:${(this.levelConfig.timeLimit % 60).toString().padStart(2, '0')}` : '无时限'
     };
     
     // 资源信息
@@ -21,8 +32,8 @@ class GameManager {
     this.eliminationSlots = new Array(8).fill(null).map(() => ({ block: null, highlight: false }));
     
     // 倒计时 (单位: 秒)
-    this.maxCountdown = 60;
-    this.countdown = 60;
+    this.maxCountdown = this.levelConfig.timeLimit || 150;
+    this.countdown = this.levelConfig.timeLimit || 150;
     
     // 技能进度
     this.skillProgress = 0.6;
@@ -33,6 +44,18 @@ class GameManager {
     
     // 历史记录 (用于回溯)
     this.history = [];
+    
+    // 重力方向 (动态重力机制)
+    this.gravityDirection = 'down';
+    
+    // 病毒清理进度 (数据超载机制)
+    this.virusCleanupProgress = 0;
+    
+    // 时间冻结状态 (时之沙漏机制)
+    this.isTimeFrozen = false;
+    
+    // 相位状态 (相位切换机制)
+    this.currentPhase = 0; // 0 和 1 两个相位
   }
   
   // 添加方块到槽位
@@ -581,20 +604,62 @@ class GameManager {
     return false;
   }
   
+  // 增加病毒清理进度
+  increaseVirusCleanupProgress() {
+    // 每次消除增加10%的进度
+    this.virusCleanupProgress += 10;
+    if (this.virusCleanupProgress > 100) {
+      this.virusCleanupProgress = 100;
+    }
+  }
+  
+  // 切换时间冻结状态
+  toggleTimeFreeze() {
+    this.isTimeFrozen = !this.isTimeFrozen;
+    console.log('Time freeze toggled:', this.isTimeFrozen);
+    
+    // 时间冻结时，停止倒计时和资源生成
+    // 时间解冻时，恢复正常
+  }
+  
+  // 切换相位状态
+  togglePhase() {
+    this.currentPhase = 1 - this.currentPhase;
+    console.log('Phase toggled to:', this.currentPhase);
+    
+    // 相位切换时，可以改变方块的可见性、颜色或其他属性
+  }
+  
   // 检查游戏是否结束
   checkGameOver() {
-    if (this.resources.crystal >= 10) {
-      // 达成目标
-      this.isGameOver = true;
-      this.isVictory = true; // 标记为胜利
-      return true;
+    // 根据关卡配置检查胜利条件
+    if (this.levelConfig) {
+      // 检查是否完成关卡目标
+      if (this.checkLevelGoal()) {
+        this.isGameOver = true;
+        this.isVictory = true; // 标记为胜利
+        return true;
+      }
+    } else {
+      // 默认胜利条件
+      if (this.resources.crystal >= 10) {
+        this.isGameOver = true;
+        this.isVictory = true; // 标记为胜利
+        return true;
+      }
     }
     
     // 检查是否所有方块都已消除（胜利条件）
     // 1. 检查场景中是否还有方块
     let hasBlocksInScene = false;
     if (this.cube && this.cube.cubeGroup && this.cube.cubeGroup.children.length > 0) {
-        hasBlocksInScene = true;
+        // 排除引力环等非方块对象
+        for (let child of this.cube.cubeGroup.children) {
+          if (child.userData && !child.userData.isGravityRing) {
+            hasBlocksInScene = true;
+            break;
+          }
+        }
     }
     
     // 2. 检查消除槽中是否还有方块
@@ -650,9 +715,48 @@ class GameManager {
     return false;
   }
   
+  // 检查关卡目标是否完成
+  checkLevelGoal() {
+    if (!this.levelConfig) return false;
+    
+    const target = this.levelConfig.target;
+    
+    // 根据不同的关卡目标进行检查
+    if (target.includes('收集')) {
+      // 收集资源类型的目标
+      if (target.includes('晶体')) {
+        const match = target.match(/收集(\d+)个晶体/);
+        if (match) {
+          const required = parseInt(match[1]);
+          return this.resources.crystal >= required;
+        }
+      } else if (target.includes('金属')) {
+        const match = target.match(/收集(\d+)个金属/);
+        if (match) {
+          const required = parseInt(match[1]);
+          return this.resources.metal >= required;
+        }
+      } else if (target.includes('生态')) {
+        const match = target.match(/收集(\d+)个生态/);
+        if (match) {
+          const required = parseInt(match[1]);
+          return this.resources.ecology >= required;
+        }
+      }
+    } else if (target.includes('时间')) {
+      // 时间类型的目标
+      if (target.includes('存活')) {
+        // 只要倒计时还没结束，就继续游戏
+        return false;
+      }
+    }
+    
+    return false;
+  }
+  
   // 更新游戏状态
   update(deltaTime) {
-      if (this.isPaused || this.isGameOver) return { eliminated: false };
+      if (this.isPaused || this.isGameOver || this.isTimeFrozen) return { eliminated: false };
       
       // 检查是否需要返回上次的消除信息
       if (this.lastEliminationInfo) {

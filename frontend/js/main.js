@@ -43,22 +43,26 @@ class Main {
         width: systemInfo.windowWidth,
         height: systemInfo.windowHeight
       };
+      
+      // 4. 初始化选择的星系和关卡
+      this.selectedGalaxy = 1; // 默认选择第一个星系
+      this.selectedLevel = 1; // 默认选择第一关
 
-      // 4. 初始化渲染器
+      // 5. 初始化渲染器
       this.initManager = new InitManager(this, GameManager, SceneManager, StartScene, LevelSelectScene, GameScene);
       this.initManager.initRenderer(canvas);
 
-      // 5.1 初始化 UI 场景
+      // 6. 初始化 UI 场景
       this.initManager.initUI();
       
-      // 6. 初始化游戏管理器
+      // 7. 初始化游戏管理器
       this.gameManager = new GameManager();
       
-      // 7. 初始化工具类
+      // 8. 初始化工具类
       this.canvasUtils = new CanvasUtils(this);
       this.resourceManager = new ResourceManager(this);
       
-      // 8. 初始化核心管理器
+      // 9. 初始化核心管理器
       this.galaxyManager = new GalaxyManager(this);
       this.cubeManager = new CubeManager(this);
       this.particleManager = new ParticleManager(this);
@@ -66,13 +70,13 @@ class Main {
       this.inputManager = new InputManager(this);
       this.uiManager = new UIManager(this);
       
-      // 9. 初始化场景和相机
+      // 10. 初始化场景和相机
       this.initManager.initScene();
       
-      // 10. 初始化场景管理
+      // 11. 初始化场景管理
       this.initManager.initSceneManager();
       
-      // 10. 初始化事件处理
+      // 12. 初始化事件处理
       this.inputManager.initEventListeners();
       
       this.lastTime = Date.now();

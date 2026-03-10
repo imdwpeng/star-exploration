@@ -5,7 +5,7 @@ class GalaxyManager {
     this.galaxyGroup = null;
   }
 
-  createGalaxy() {
+  createGalaxy(galaxyTheme = 'soft') {
     // 创建星系容器
     this.galaxyGroup = new this.THREE.Group();
     this.galaxyGroup.position.set(0, 0, -450); // 稍微拉近一点，使其填充更多背景
@@ -15,14 +15,133 @@ class GalaxyManager {
     this.galaxyGroup.rotation.z = Math.PI / 6;
     this.game.scene.add(this.galaxyGroup);
 
+    // 根据星系主题设置颜色和参数
+    let coreWhite, coreColor, armColors, armCount, twist, starCount;
+    
+    switch(galaxyTheme) {
+      case 'soft': // 新星摇篮
+        coreWhite = new this.THREE.Color(0xffffff);
+        coreColor = new this.THREE.Color(0x00ffff);
+        armColors = {
+          primary: new this.THREE.Color(0x99ffff),
+          secondary: new this.THREE.Color(0x9C88FF),
+          deep: new this.THREE.Color(0x001133),
+          star: new this.THREE.Color(0xffffff)
+        };
+        armCount = 8;
+        twist = 3.0;
+        starCount = 80000;
+        break;
+      case 'steampunk': // 锈蚀星带
+        coreWhite = new this.THREE.Color(0xffffff);
+        coreColor = new this.THREE.Color(0xFF9A3C);
+        armColors = {
+          primary: new this.THREE.Color(0xFF9A3C),
+          secondary: new this.THREE.Color(0x3B3B98),
+          deep: new this.THREE.Color(0x1a1a1a),
+          star: new this.THREE.Color(0xffffff)
+        };
+        armCount = 6;
+        twist = 2.5;
+        starCount = 60000;
+        break;
+      case 'fog': // 星云迷雾
+        coreWhite = new this.THREE.Color(0xffffff);
+        coreColor = new this.THREE.Color(0x9C88FF);
+        armColors = {
+          primary: new this.THREE.Color(0x9C88FF),
+          secondary: new this.THREE.Color(0x00D4FF),
+          deep: new this.THREE.Color(0x001144),
+          star: new this.THREE.Color(0xffffff)
+        };
+        armCount = 10;
+        twist = 4.0;
+        starCount = 90000;
+        break;
+      case 'gravity': // 重力熔炉
+        coreWhite = new this.THREE.Color(0xffffff);
+        coreColor = new this.THREE.Color(0x00D4FF);
+        armColors = {
+          primary: new this.THREE.Color(0x00D4FF),
+          secondary: new this.THREE.Color(0x2ecc71),
+          deep: new this.THREE.Color(0x001133),
+          star: new this.THREE.Color(0xffffff)
+        };
+        armCount = 7;
+        twist = 3.5;
+        starCount = 70000;
+        break;
+      case 'cyber': // 数据洪流
+        coreWhite = new this.THREE.Color(0xffffff);
+        coreColor = new this.THREE.Color(0x00ff00);
+        armColors = {
+          primary: new this.THREE.Color(0x00ff00),
+          secondary: new this.THREE.Color(0x00D4FF),
+          deep: new this.THREE.Color(0x001111),
+          star: new this.THREE.Color(0xffffff)
+        };
+        armCount = 12;
+        twist = 5.0;
+        starCount = 120000;
+        break;
+      case 'time': // 时裔圣所
+        coreWhite = new this.THREE.Color(0xffffff);
+        coreColor = new this.THREE.Color(0xFFD32A);
+        armColors = {
+          primary: new this.THREE.Color(0xFFD32A),
+          secondary: new this.THREE.Color(0x00D8D6),
+          deep: new this.THREE.Color(0x1a1a2e),
+          star: new this.THREE.Color(0xffffff)
+        };
+        armCount = 9;
+        twist = 3.0;
+        starCount = 80000;
+        break;
+      case 'forge': // 铸星熔炉
+        coreWhite = new this.THREE.Color(0xffffff);
+        coreColor = new this.THREE.Color(0xFF4757);
+        armColors = {
+          primary: new this.THREE.Color(0xFF4757),
+          secondary: new this.THREE.Color(0xFF9A3C),
+          deep: new this.THREE.Color(0x1a1a1a),
+          star: new this.THREE.Color(0xffffff)
+        };
+        armCount = 6;
+        twist = 2.0;
+        starCount = 60000;
+        break;
+      case 'singularity': // 终末奇点
+        coreWhite = new this.THREE.Color(0xffffff);
+        coreColor = new this.THREE.Color(0xFF00FF);
+        armColors = {
+          primary: new this.THREE.Color(0xFF00FF),
+          secondary: new this.THREE.Color(0x9C88FF),
+          deep: new this.THREE.Color(0x001133),
+          star: new this.THREE.Color(0xffffff)
+        };
+        armCount = 15;
+        twist = 6.0;
+        starCount = 150000;
+        break;
+      default:
+        coreWhite = new this.THREE.Color(0xffffff);
+        coreColor = new this.THREE.Color(0x00ffff);
+        armColors = {
+          primary: new this.THREE.Color(0x99ffff),
+          secondary: new this.THREE.Color(0x3366ff),
+          deep: new this.THREE.Color(0x001133),
+          star: new this.THREE.Color(0xffffff)
+        };
+        armCount = 12;
+        twist = 4.5;
+        starCount = 100000;
+    }
+
     // 1. 星系核 (Galactic Nucleus) - 极其明亮且有层次的核心
     const coreCount = 8000; // 增加核心粒子数
     const coreGeometry = new this.THREE.BufferGeometry();
     const corePositions = [];
     const coreColors = [];
-    
-    const coreWhite = new this.THREE.Color(0xffffff);
-    const coreGold = new this.THREE.Color(0xffe066); 
 
     for (let i = 0; i < coreCount; i++) {
         // 中心极度密集
@@ -36,7 +155,7 @@ class GalaxyManager {
         
         corePositions.push(x, y, z);
         
-        const color = coreWhite.clone().lerp(coreGold, r / 80);
+        const color = coreWhite.clone().lerp(coreColor, r / 80);
         coreColors.push(color.r, color.g, color.b);
     }
     
@@ -60,18 +179,9 @@ class GalaxyManager {
     this.galaxyGroup.add(nucleus);
 
     // 2. 旋臂 (Spiral Arms) - 多层、交织、宏大
-    const starCount = 100000; // 增加粒子数以支持更多旋臂的密度
     const armGeometry = new this.THREE.BufferGeometry();
     const positions = [];
     const colors = [];
-    
-    const armCount = 12; // 增加到12条旋臂，实现极其细密且交织的效果
-    const twist = 4.5;  
-    
-    const cyanColor = new this.THREE.Color(0x99ffff); 
-    const blueColor = new this.THREE.Color(0x3366ff); 
-    const deepBlue = new this.THREE.Color(0x001133);  
-    const starWhite = new this.THREE.Color(0xffffff); 
 
     for (let i = 0; i < starCount; i++) {
         const armIndex = i % armCount;
@@ -108,13 +218,13 @@ class GalaxyManager {
         const rand = Math.random();
         
         if (relDist < 0.12) {
-            color = coreGold.clone().lerp(cyanColor, relDist / 0.12);
+            color = coreColor.clone().lerp(armColors.primary, relDist / 0.12);
         } else if (rand > 0.99) {
-            color = starWhite; // 孤立的亮恒星
+            color = armColors.star; // 孤立的亮恒星
         } else if (rand > 0.4) {
-            color = cyanColor.clone().lerp(blueColor, relDist);
+            color = armColors.primary.clone().lerp(armColors.secondary, relDist);
         } else {
-            color = blueColor.clone().lerp(deepBlue, relDist);
+            color = armColors.secondary.clone().lerp(armColors.deep, relDist);
         }
         
         // 亮度梯度：旋臂主干区域更亮
@@ -146,10 +256,10 @@ class GalaxyManager {
     this.galaxyGroup.add(spiralArms);
 
     // 3. 背景背景星星 (更远、更暗、增加空间感)
-    this.createBackgroundStars(2000);
+    this.createBackgroundStars(2000, galaxyTheme);
   }
 
-  createBackgroundStars(count = 500) {
+  createBackgroundStars(count = 500, galaxyTheme = 'soft') {
       const geometry = new this.THREE.BufferGeometry();
       const positions = [];
       
@@ -171,8 +281,25 @@ class GalaxyManager {
           geometry.addAttribute('position', new this.THREE.BufferAttribute(new Float32Array(positions), 3));
       }
       
+      // 根据星系主题设置星星颜色
+      let starColor = 0xffffff;
+      switch(galaxyTheme) {
+        case 'steampunk':
+          starColor = 0xFFD32A;
+          break;
+        case 'cyber':
+          starColor = 0x00ff00;
+          break;
+        case 'forge':
+          starColor = 0xFFFF00;
+          break;
+        case 'singularity':
+          starColor = 0xFF00FF;
+          break;
+      }
+      
       const material = new this.THREE.PointsMaterial({
-          color: 0xffffff,
+          color: starColor,
           size: 1.0,
           transparent: true,
           opacity: 0.3

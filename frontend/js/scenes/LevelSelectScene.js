@@ -144,6 +144,10 @@ class LevelSelectScene {
 
         if (x >= levelX && x <= levelX + levelWidth &&
             y >= levelY && y <= levelY + levelHeight) {
+          // 保存选择的星系和关卡信息
+          this.game.selectedGalaxy = galaxyIndex + 1;
+          this.game.selectedLevel = levelIndex + 1;
+          
           // 切换到游戏场景
           this.game.sceneManager.switchScene('game');
           // 初始化游戏
