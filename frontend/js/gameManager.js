@@ -680,4 +680,6 @@ class GameManager {
   }
 }
 
-export default GameManager;
+module.exports = {
+  default: GameManager
+};
