@@ -56,6 +56,9 @@ class Main {
       // 8. 初始化事件处理
       this.initEventListeners();
       
+      // 9. 初始化场景管理
+      this.currentScene = 'start'; // start, levelSelect, game
+      
       this.lastTime = Date.now();
       this.animate();
     } else {
@@ -1195,84 +1198,154 @@ class Main {
   }
   
   handleTap(clientX, clientY) {
-      // 如果游戏结束，检查是否点击了重新开始按钮
-      if (this.gameManager.isGameOver) {
-        const btnX = this.windowWidth / 2 - 80;
-        const btnY = this.windowHeight / 2 + 60;
-        const btnWidth = 160;
-        const btnHeight = 40;
-        
-        if (clientX >= btnX && clientX <= btnX + btnWidth &&
-            clientY >= btnY && clientY <= btnY + btnHeight) {
-          // 重新开始游戏
-          // 重新创建 GameManager 实例
-          this.gameManager = new GameManager();
+    // 根据当前场景处理不同的触摸事件
+    switch (this.currentScene) {
+      case 'start':
+        this.handleStartSceneTap(clientX, clientY);
+        return;
+      case 'levelSelect':
+        this.handleLevelSelectSceneTap(clientX, clientY);
+        return;
+      case 'game':
+        // 游戏场景的原有逻辑
+        // 如果游戏结束，检查是否点击了重新开始按钮
+        if (this.gameManager.isGameOver) {
+          const btnX = this.windowWidth / 2 - 80;
+          const btnY = this.windowHeight / 2 + 60;
+          const btnWidth = 160;
+          const btnHeight = 40;
           
-          // 重新初始化魔方
-    this.initCube();
-    
-    // 清空粒子特效
-    this.clearParticles();
-    
-    // 重新绑定引用
-    this.gameManager.cube = this.cube;
-    
-    // 清空飞行方块
-    this.flyingBlocks = [];
-          this.gameManager.THREE = this.THREE;
-          
+          if (clientX >= btnX && clientX <= btnX + btnWidth &&
+              clientY >= btnY && clientY <= btnY + btnHeight) {
+            // 重新开始游戏
+            // 重新创建 GameManager 实例
+            this.gameManager = new GameManager();
+            
+            // 重新初始化魔方
+            this.initCube();
+            
+            // 清空粒子特效
+            this.clearParticles();
+            
+            // 重新绑定引用
+            this.gameManager.cube = this.cube;
+            
+            // 清空飞行方块
+            this.flyingBlocks = [];
+            this.gameManager.THREE = this.THREE;
+            
+            return;
+          }
+          return; // 游戏结束时不响应其他点击
+        }
+
+        // 如果游戏暂停，检查是否点击了继续按钮
+        if (this.gameManager.isPaused) {
+           const btnX = this.windowWidth / 2 - 80;
+           const btnY = this.windowHeight / 2;
+           const btnWidth = 160;
+           const btnHeight = 40;
+           
+           if (clientX >= btnX && clientX <= btnX + btnWidth &&
+               clientY >= btnY && clientY <= btnY + btnHeight) {
+              this.gameManager.isPaused = false;
+           }
+           return;
+        }
+
+        // 检查是否点击了底部快捷操作按钮
+        if (this.checkBottomActions(clientX, clientY)) {
           return;
         }
-        return; // 游戏结束时不响应其他点击
-      }
-
-      // 如果游戏暂停，检查是否点击了继续按钮
-      if (this.gameManager.isPaused) {
-         const btnX = this.windowWidth / 2 - 80;
-         const btnY = this.windowHeight / 2;
-         const btnWidth = 160;
-         const btnHeight = 40;
-         
-         if (clientX >= btnX && clientX <= btnX + btnWidth &&
-             clientY >= btnY && clientY <= btnY + btnHeight) {
-            this.gameManager.isPaused = false;
-         }
-         return;
-      }
-
-      // 检查是否点击了底部快捷操作按钮
-      if (this.checkBottomActions(clientX, clientY)) {
+        
+        // 检查是否点击了功能栏按钮
+      // if (this.checkFunctionButtons && this.checkFunctionButtons(clientX, clientY)) {
+      //   return;
+      // }
+      
+      // 检查是否点击了待消除槽
+      if (this.checkEliminationSlots && this.checkEliminationSlots(clientX, clientY)) {
         return;
       }
       
-      // 检查是否点击了功能栏按钮
-    // if (this.checkFunctionButtons && this.checkFunctionButtons(clientX, clientY)) {
-    //   return;
-    // }
-    
-    // 检查是否点击了待消除槽
-    if (this.checkEliminationSlots && this.checkEliminationSlots(clientX, clientY)) {
+      // 检查是否点击了魔方方块
+      // 需要将屏幕坐标转换为 normalized device coordinates (-1 to +1)
+      const rect = { left: 0, top: 0, width: this.windowWidth, height: this.windowHeight };
+      // 如果是在 web 环境，需要获取 canvas 的 rect
+      if (typeof window !== 'undefined' && window.canvas && window.canvas.getBoundingClientRect) {
+          const r = window.canvas.getBoundingClientRect();
+          rect.left = r.left;
+          rect.top = r.top;
+          rect.width = r.width;
+          rect.height = r.height;
+      }
+
+      const mouse = new this.THREE.Vector2();
+      mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+      if (this.checkClick) {
+        this.checkClick(mouse);
+      }
+        break;
+    }
+  }
+
+  handleStartSceneTap(clientX, clientY) {
+    // 检查是否点击了开始游戏按钮
+    const buttonWidth = 200;
+    const buttonHeight = 60;
+    const buttonX = (this.windowWidth - buttonWidth) / 2;
+    const buttonY = this.windowHeight / 2 + 50;
+
+    if (clientX >= buttonX && clientX <= buttonX + buttonWidth &&
+        clientY >= buttonY && clientY <= buttonY + buttonHeight) {
+      // 切换到关卡选择场景
+      this.currentScene = 'levelSelect';
+    }
+  }
+
+  handleLevelSelectSceneTap(clientX, clientY) {
+    // 检查是否点击了返回按钮
+    const backButtonWidth = 120;
+    const backButtonHeight = 40;
+    const backButtonX = 40;
+    const backButtonY = this.windowHeight - 60;
+
+    if (clientX >= backButtonX && clientX <= backButtonX + backButtonWidth &&
+        clientY >= backButtonY && clientY <= backButtonY + backButtonHeight) {
+      // 切换到开始场景
+      this.currentScene = 'start';
       return;
     }
-    
-    // 检查是否点击了魔方方块
-    // 需要将屏幕坐标转换为 normalized device coordinates (-1 to +1)
-    const rect = { left: 0, top: 0, width: this.windowWidth, height: this.windowHeight };
-    // 如果是在 web 环境，需要获取 canvas 的 rect
-    if (typeof window !== 'undefined' && window.canvas && window.canvas.getBoundingClientRect) {
-        const r = window.canvas.getBoundingClientRect();
-        rect.left = r.left;
-        rect.top = r.top;
-        rect.width = r.width;
-        rect.height = r.height;
-    }
 
-    const mouse = new this.THREE.Vector2();
-    mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    // 检查是否点击了关卡按钮
+    const startY = 120;
+    const galaxyHeight = 80;
+    const levelWidth = 40;
+    const levelHeight = 40;
+    const levelGap = 10;
 
-    if (this.checkClick) {
-      this.checkClick(mouse);
+    for (let galaxyIndex = 0; galaxyIndex < 8; galaxyIndex++) {
+      const galaxyY = startY + galaxyIndex * galaxyHeight;
+
+      for (let levelIndex = 0; levelIndex < 8; levelIndex++) {
+        const levelX = 200 + levelIndex * (levelWidth + levelGap);
+        const levelY = galaxyY + 10;
+
+        if (clientX >= levelX && clientX <= levelX + levelWidth &&
+            clientY >= levelY && clientY <= levelY + levelHeight) {
+          // 切换到游戏场景
+          this.currentScene = 'game';
+          // 初始化游戏
+          this.gameManager = new GameManager();
+          this.initCube();
+          this.gameManager.cube = this.cube;
+          this.gameManager.THREE = this.THREE;
+          this.flyingBlocks = [];
+          return;
+        }
+      }
     }
   }
 
@@ -1591,17 +1664,52 @@ class Main {
     
     const time = currentTime * 0.001;
 
-    // 1. 魔方悬浮动画
-    if (this.cubeGroup && !this.isDragging) {
-        // 上下轻微浮动 (振幅 2，频率 1)
-        this.cubeGroup.position.y = Math.sin(time) * 2;
-        // 缓慢自转 (增加一点动态感)
-        this.cubeGroup.rotation.y += 0.001;
-        this.cubeGroup.rotation.x += 0.0005;
-        
-        // 方块呼吸灯效果
-        if (this.blocks) {
-            this.blocks.forEach(block => {
+    // 2. 星系旋转 (沿着其自身中轴线)
+    if (this.galaxyGroup) {
+        this.galaxyGroup.children.forEach(child => {
+            if (child.isPoints) {
+                // 星系核和旋臂沿 Y 轴旋转
+                child.rotation.y += 0.0005;
+            }
+        });
+    }
+
+    // 根据当前场景执行不同逻辑
+    switch (this.currentScene) {
+      case 'start':
+        this.updateStartScene(delta);
+        break;
+      case 'levelSelect':
+        this.updateLevelSelectScene(delta);
+        break;
+      case 'game':
+        // 1. 魔方悬浮动画
+        if (this.cubeGroup && !this.isDragging) {
+            // 上下轻微浮动 (振幅 2，频率 1)
+            this.cubeGroup.position.y = Math.sin(time) * 2;
+            // 缓慢自转 (增加一点动态感)
+            this.cubeGroup.rotation.y += 0.001;
+            this.cubeGroup.rotation.x += 0.0005;
+            
+            // 方块呼吸灯效果
+            if (this.blocks) {
+                this.blocks.forEach(block => {
+                    if (block.material && block.userData) {
+                        const offset = block.userData.randomOffset || 0;
+                        // 呼吸频率 2，范围 0.4 - 0.8
+                        const intensity = 0.4 + (Math.sin(time * 2 + offset) + 1) * 0.2;
+                        
+                        if (Array.isArray(block.material)) {
+                            block.material.forEach(m => m.emissiveIntensity = intensity);
+                        } else {
+                            block.material.emissiveIntensity = intensity;
+                        }
+                    }
+                });
+            }
+        } else if (this.blocks) {
+            // 即使在拖拽时，也保持呼吸灯效果
+             this.blocks.forEach(block => {
                 if (block.material && block.userData) {
                     const offset = block.userData.randomOffset || 0;
                     // 呼吸频率 2，范围 0.4 - 0.8
@@ -1615,75 +1723,53 @@ class Main {
                 }
             });
         }
-    } else if (this.blocks) {
-        // 即使在拖拽时，也保持呼吸灯效果
-         this.blocks.forEach(block => {
-            if (block.material && block.userData) {
-                const offset = block.userData.randomOffset || 0;
-                // 呼吸频率 2，范围 0.4 - 0.8
-                const intensity = 0.4 + (Math.sin(time * 2 + offset) + 1) * 0.2;
+
+        // 更新游戏状态
+        const eliminationInfo = this.gameManager.update(delta);
+        if (eliminationInfo && eliminationInfo.eliminated) {
+            // 播放消除特效
+            const slotWidth = 40;
+            const gap = 5;
+            const slotHeight = 40;
+            const totalWidth = 8 * slotWidth + 7 * gap; // Fixed 8 slots
+            const startX = (this.windowWidth - totalWidth) / 2;
+            const startY = this.windowHeight - 80 - 20 - slotHeight; 
+            
+            // 计算消除中心位置
+            const indices = eliminationInfo.indices;
+            if (indices && indices.length > 0) {
+                // 取中间的槽位索引
+                const centerIndex = indices[Math.floor(indices.length / 2)];
                 
-                if (Array.isArray(block.material)) {
-                    block.material.forEach(m => m.emissiveIntensity = intensity);
-                } else {
-                    block.material.emissiveIntensity = intensity;
-                }
+                const centerX = startX + centerIndex * (slotWidth + gap) + slotWidth / 2;
+                const centerY = startY + slotHeight / 2;
+                
+                // 获取颜色 (从 eliminationInfo 中获取，或者默认为白色)
+                const color = eliminationInfo.color || 0xffffff;
+                
+                // 创建爆炸特效
+                this.createExplosion(centerX, centerY, color);
             }
-        });
-    }
-
-    // 2. 星系旋转 (沿着其自身中轴线)
-    if (this.galaxyGroup) {
-        this.galaxyGroup.children.forEach(child => {
-            if (child.isPoints) {
-                // 星系核和旋臂沿 Y 轴旋转
-                child.rotation.y += 0.0005;
-            }
-        });
-    }
-
-    // 更新游戏状态
-    const eliminationInfo = this.gameManager.update(delta);
-    if (eliminationInfo && eliminationInfo.eliminated) {
-        // 播放消除特效
-        const slotWidth = 40;
-        const gap = 5;
-        const slotHeight = 40;
-        const totalWidth = 8 * slotWidth + 7 * gap; // Fixed 8 slots
-        const startX = (this.windowWidth - totalWidth) / 2;
-        const startY = this.windowHeight - 80 - 20 - slotHeight; 
-        
-        // 计算消除中心位置
-        const indices = eliminationInfo.indices;
-        if (indices && indices.length > 0) {
-            // 取中间的槽位索引
-            const centerIndex = indices[Math.floor(indices.length / 2)];
-            
-            const centerX = startX + centerIndex * (slotWidth + gap) + slotWidth / 2;
-            const centerY = startY + slotHeight / 2;
-            
-            // 获取颜色 (从 eliminationInfo 中获取，或者默认为白色)
-            const color = eliminationInfo.color || 0xffffff;
-            
-            // 创建爆炸特效
-            this.createExplosion(centerX, centerY, color);
         }
+        
+        // 更新粒子
+        this.updateParticles();
+        
+        // 更新飞行方块
+        this.updateFlyingBlocks();
+        break;
     }
-    
-    // 更新粒子
-    this.updateParticles();
-    
-    // 更新飞行方块
-    this.updateFlyingBlocks();
 
     // 绘制2D UI
     this.drawUI();
     
     // 显示游戏结束或暂停界面
-    if (this.gameManager.isGameOver) {
-      this.showGameOver();
-    } else if (this.gameManager.isPaused) {
-      this.showPause();
+    if (this.currentScene === 'game') {
+      if (this.gameManager.isGameOver) {
+        this.showGameOver();
+      } else if (this.gameManager.isPaused) {
+        this.showPause();
+      }
     }
     
     // 渲染3D场景
@@ -1700,6 +1786,14 @@ class Main {
     } else {
       requestAnimationFrame(this.animate.bind(this));
     }
+  }
+
+  updateStartScene(deltaTime) {
+    // 开始游戏场景更新
+  }
+
+  updateLevelSelectScene(deltaTime) {
+    // 关卡选择场景更新
   }
   
   checkEliminationSlots(x, y) {
@@ -2001,32 +2095,190 @@ class Main {
     // 清除上一帧内容
     ctx.clearRect(0, 0, this.uiCanvas.width, this.uiCanvas.height);
     
-    ctx.save();
-    // 缩放以匹配逻辑像素
-    ctx.scale(this.pixelRatio, this.pixelRatio);
-    
-    // 绘制顶部资源栏
-    this.drawTopBar(ctx);
-    
-    // 绘制倒计时进度条
-    this.drawCountdownBar(ctx);
-    
-    // 绘制待消除槽
-    this.drawEliminationSlots(ctx);
-    
-    // 绘制飞行方块
-    this.drawFlyingBlocks(ctx);
-    
-    // 绘制底部快捷操作
-    this.drawBottomActions(ctx);
-    
-    // 绘制功能栏按钮 - 移除
-    // this.drawFunctionBars(ctx);
-    
-    ctx.restore();
+    // 根据当前场景绘制不同的UI
+    switch (this.currentScene) {
+      case 'start':
+        this.drawStartScene();
+        break;
+      case 'levelSelect':
+        this.drawLevelSelectScene();
+        break;
+      case 'game':
+        ctx.save();
+        // 缩放以匹配逻辑像素
+        ctx.scale(this.pixelRatio, this.pixelRatio);
+        
+        // 绘制顶部资源栏
+        this.drawTopBar(ctx);
+        
+        // 绘制倒计时进度条
+        this.drawCountdownBar(ctx);
+        
+        // 绘制待消除槽
+        this.drawEliminationSlots(ctx);
+        
+        // 绘制飞行方块
+        this.drawFlyingBlocks(ctx);
+        
+        // 绘制底部快捷操作
+        this.drawBottomActions(ctx);
+        
+        // 绘制功能栏按钮 - 移除
+        // this.drawFunctionBars(ctx);
+        
+        ctx.restore();
+        break;
+    }
     
     // 标记纹理需要更新
     this.uiTexture.needsUpdate = true;
+  }
+
+  drawStartScene() {
+    const ctx = this.uiCanvas.getContext('2d');
+    
+    ctx.save();
+    // 缩放以匹配逻辑像素
+    ctx.scale(this.pixelRatio, this.pixelRatio);
+
+    // 绘制背景
+    const bgGrad = ctx.createLinearGradient(0, 0, this.windowWidth, this.windowHeight);
+    bgGrad.addColorStop(0, '#050510');
+    bgGrad.addColorStop(1, '#1a1a2e');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, this.windowWidth, this.windowHeight);
+
+    // 绘制标题
+    ctx.font = 'bold 48px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#00ffff';
+    ctx.shadowColor = '#00ffff';
+    ctx.shadowBlur = 10;
+    ctx.fillText('星海迷航', this.windowWidth / 2, this.windowHeight / 2 - 100);
+    ctx.shadowBlur = 0;
+
+    // 绘制副标题
+    ctx.font = '24px Arial';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('探索宇宙的奥秘', this.windowWidth / 2, this.windowHeight / 2 - 50);
+
+    // 绘制开始游戏按钮
+    const buttonWidth = 200;
+    const buttonHeight = 60;
+    const buttonX = (this.windowWidth - buttonWidth) / 2;
+    const buttonY = this.windowHeight / 2 + 50;
+
+    // 按钮背景
+    const buttonGrad = ctx.createLinearGradient(buttonX, buttonY, buttonX, buttonY + buttonHeight);
+    buttonGrad.addColorStop(0, '#00D4FF');
+    buttonGrad.addColorStop(1, '#0099CC');
+    ctx.fillStyle = buttonGrad;
+    ctx.strokeStyle = '#00ffff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    // 使用兼容的方式绘制圆角矩形
+    this.drawRoundedRect(ctx, buttonX + buttonWidth / 2, buttonY + buttonHeight / 2, buttonWidth, 10, null, '#00ffff');
+    ctx.fillStyle = buttonGrad;
+    ctx.fill();
+
+    // 按钮文字
+    ctx.font = 'bold 24px Arial';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('开始游戏', this.windowWidth / 2, this.windowHeight / 2 + 80);
+    
+    ctx.restore();
+  }
+
+  drawLevelSelectScene() {
+    const ctx = this.uiCanvas.getContext('2d');
+    
+    ctx.save();
+    // 缩放以匹配逻辑像素
+    ctx.scale(this.pixelRatio, this.pixelRatio);
+
+    // 绘制背景
+    const bgGrad = ctx.createLinearGradient(0, 0, this.windowWidth, this.windowHeight);
+    bgGrad.addColorStop(0, '#050510');
+    bgGrad.addColorStop(1, '#1a1a2e');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, this.windowWidth, this.windowHeight);
+
+    // 绘制标题
+    ctx.font = 'bold 36px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#00ffff';
+    ctx.shadowColor = '#00ffff';
+    ctx.shadowBlur = 10;
+    ctx.fillText('选择关卡', this.windowWidth / 2, 60);
+    ctx.shadowBlur = 0;
+
+    // 绘制关卡列表
+    const galaxies = [
+      { name: '新星摇篮', levels: 8 },
+      { name: '锈蚀星带', levels: 8 },
+      { name: '星云迷雾', levels: 8 },
+      { name: '重力熔炉', levels: 8 },
+      { name: '数据洪流', levels: 8 },
+      { name: '时裔圣所', levels: 8 },
+      { name: '铸星熔炉', levels: 8 },
+      { name: '终末奇点', levels: 8 }
+    ];
+
+    const startY = 120;
+    const galaxyHeight = 80;
+    const levelWidth = 40;
+    const levelHeight = 40;
+    const levelGap = 10;
+
+    galaxies.forEach((galaxy, galaxyIndex) => {
+      const galaxyY = startY + galaxyIndex * galaxyHeight;
+
+      // 绘制星系名称
+      ctx.font = '20px Arial';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(`${galaxyIndex + 1}. ${galaxy.name}`, 40, galaxyY + 25);
+
+      // 绘制关卡按钮
+      for (let i = 0; i < galaxy.levels; i++) {
+        const levelX = 200 + i * (levelWidth + levelGap);
+        const levelY = galaxyY + 10;
+
+        // 关卡按钮背景
+        ctx.fillStyle = '#1a1a2e';
+        ctx.strokeStyle = '#00D4FF';
+        ctx.lineWidth = 2;
+        // 使用兼容的方式绘制圆角矩形
+        this.drawRoundedRect(ctx, levelX + levelWidth / 2, levelY + levelHeight / 2, levelWidth, 5, '#1a1a2e', '#00D4FF');
+
+        // 关卡数字
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(`${i + 1}`, levelX + levelWidth / 2, levelY + levelHeight / 2 + 4);
+      }
+    });
+
+    // 绘制返回按钮
+    const backButtonWidth = 120;
+    const backButtonHeight = 40;
+    const backButtonX = 40;
+    const backButtonY = this.windowHeight - 60;
+
+    ctx.fillStyle = '#1a1a2e';
+    ctx.strokeStyle = '#00D4FF';
+    ctx.lineWidth = 2;
+    // 使用兼容的方式绘制圆角矩形
+    this.drawRoundedRect(ctx, backButtonX + backButtonWidth / 2, backButtonY + backButtonHeight / 2, backButtonWidth, 5, '#1a1a2e', '#00D4FF');
+
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('返回', backButtonX + backButtonWidth / 2, backButtonY + backButtonHeight / 2 + 4);
+    
+    ctx.restore();
   }
   
   drawFlyingBlocks(ctx) {
