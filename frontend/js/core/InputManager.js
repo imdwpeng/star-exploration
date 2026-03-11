@@ -154,37 +154,62 @@ class InputManager {
     const touch = event.touches[0];
     this.touchStartX = touch.clientX;
     this.touchStartY = touch.clientY;
-    this.isDragging = false; // 初始状态不视为拖动
+    this.isDragging = false;
     this.previousTouchPosition = { x: touch.clientX, y: touch.clientY };
+    
+    // 关卡选择场景处理滚动
+    if (this.game.sceneManager && this.game.sceneManager.currentSceneName === 'levelSelect') {
+      const levelSelectScene = this.game.sceneManager.scenes.levelSelect;
+      if (levelSelectScene && levelSelectScene.handleTouchStart) {
+        levelSelectScene.handleTouchStart(touch.clientX, touch.clientY);
+      }
+    }
   }
   
   onTouchMove(event) {
-      const touch = event.touches[0];
-      
-      // 计算位移
-      const moveX = touch.clientX - this.touchStartX;
-      const moveY = touch.clientY - this.touchStartY;
-      const distance = Math.sqrt(moveX * moveX + moveY * moveY);
-      
-      // 只有移动超过一定距离才视为拖动
-      if (distance > 5) {
-          this.isDragging = true;
+    const touch = event.touches[0];
+    
+    // 关卡选择场景处理滚动
+    if (this.game.sceneManager && this.game.sceneManager.currentSceneName === 'levelSelect') {
+      const levelSelectScene = this.game.sceneManager.scenes.levelSelect;
+      if (levelSelectScene && levelSelectScene.handleTouchMove) {
+        levelSelectScene.handleTouchMove(touch.clientX, touch.clientY);
+        return; // 滚动时不旋转魔方
       }
+    }
+    
+    // 计算位移
+    const moveX = touch.clientX - this.touchStartX;
+    const moveY = touch.clientY - this.touchStartY;
+    const distance = Math.sqrt(moveX * moveX + moveY * moveY);
+    
+    // 只有移动超过一定距离才视为拖动
+    if (distance > 5) {
+        this.isDragging = true;
+    }
 
-      if (this.isDragging) {
-        const deltaMove = {
-          x: touch.clientX - this.previousTouchPosition.x,
-          y: touch.clientY - this.previousTouchPosition.y
-        };
-        
-        this.game.cubeManager.cubeGroup.rotation.y += deltaMove.x * 0.01;
-        this.game.cubeManager.cubeGroup.rotation.x += deltaMove.y * 0.01;
-        
-        this.previousTouchPosition = { x: touch.clientX, y: touch.clientY };
-      }
+    if (this.isDragging) {
+      const deltaMove = {
+        x: touch.clientX - this.previousTouchPosition.x,
+        y: touch.clientY - this.previousTouchPosition.y
+      };
+      
+      this.game.cubeManager.cubeGroup.rotation.y += deltaMove.x * 0.01;
+      this.game.cubeManager.cubeGroup.rotation.x += deltaMove.y * 0.01;
+      
+      this.previousTouchPosition = { x: touch.clientX, y: touch.clientY };
+    }
   }
   
   onTouchEnd(event) {
+    // 关卡选择场景处理滚动结束
+    if (this.game.sceneManager && this.game.sceneManager.currentSceneName === 'levelSelect') {
+      const levelSelectScene = this.game.sceneManager.scenes.levelSelect;
+      if (levelSelectScene && levelSelectScene.handleTouchEnd) {
+        levelSelectScene.handleTouchEnd();
+      }
+    }
+    
     if (!this.isDragging) {
         // 如果没有发生拖动，则视为点击
         const touch = event.changedTouches[0];

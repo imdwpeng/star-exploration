@@ -3,6 +3,7 @@ class SceneManager {
   constructor(game) {
     this.game = game;
     this.currentScene = null;
+    this.currentSceneName = '';
     this.scenes = {};
   }
 
@@ -16,6 +17,7 @@ class SceneManager {
     if (this.currentScene) {
       this.currentScene.exit();
     }
+    this.currentSceneName = name;
     this.currentScene = this.scenes[name];
     this.currentScene.enter();
   }
