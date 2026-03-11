@@ -10,7 +10,14 @@ const LevelConfig = {
       description: '探险起点，协助AI重启观测站。',
       artStyle: '柔和明亮，低饱和度星云，方块带温和光晕。',
       levels: [
-        { id: 1, name: '初次接触', target: '零风险教学基础操作', timeLimit: 0, blockCount: 216, blockTypes: 6, layout: '6层(6x6x6)' },
+        { id: 1, name: '初次接触', target: '零风险教学基础操作', timeLimit: 0, blockCount: 216, blockTypes: 6, layout: '6层(6x6x6)', layoutData: [
+          '001100 011110 111111 111111 011110 001100',
+          '011110 111111 111111 111111 111111 011110',
+          '111111 111111 111111 111111 111111 111111',
+          '111111 111111 111111 111111 111111 111111',
+          '011110 111111 111111 111111 111111 011110',
+          '001100 011110 111111 111111 011110 001100'
+        ] },
         { id: 2, name: '引力路径', target: '理解操作顺序性', timeLimit: 0, blockCount: 252, blockTypes: 8, layout: '7层(6x6x7)' },
         { id: 3, name: '选择之重', target: '基于槽内状态做决策', timeLimit: 0, blockCount: 288, blockTypes: 10, layout: '8层(6x6x8)' },
         { id: 4, name: '立体收割', target: '高效获取资源', timeLimit: 0, blockCount: 324, blockTypes: 12, layout: '9层(6x6x9)' },

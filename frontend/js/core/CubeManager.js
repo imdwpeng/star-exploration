@@ -164,164 +164,333 @@ class CubeManager {
     // 创建方块
     let typeIndex = 0;
     
-    for (let x = 0; x < size; x++) {
-      for (let y = 0; y < size; y++) {
-        for (let z = 0; z < size; z++) {
-          if (typeIndex >= typeArray.length) break;
-          
-          const type = typeArray[typeIndex++];
-          const safeType = type % colors.length;
-          const color = colors[safeType];
-          
-          const geometry = new this.THREE.BoxGeometry(blockSize, blockSize, blockSize);
-          // 根据星系主题调整材质
-          let materialOptions = {
-              color: 0xffffff,
-              map: this.textureCache[type],
-              roughness: 0.2,
-              metalness: 0.5,
-              emissive: color,
-              emissiveIntensity: 1.0
-          };
-          
-          // 根据星系主题调整材质属性
-          switch(galaxyTheme) {
-            case 'soft':
-              materialOptions.emissiveIntensity = 1.0; // 柔和的发光
-              break;
-            case 'steampunk':
-              materialOptions.roughness = 0.8; // 粗糙的金属感
-              materialOptions.metalness = 0.8;
-              materialOptions.emissiveIntensity = 1.2;
-              break;
-            case 'fog':
-              materialOptions.emissiveIntensity = 1.5; // 强烈的发光穿透迷雾
-              break;
-            case 'gravity':
-              materialOptions.roughness = 0.4; // 金属质感
-              materialOptions.metalness = 0.7;
-              materialOptions.emissiveIntensity = 1.2;
-              break;
-            case 'cyber':
-              materialOptions.emissiveIntensity = 1.8; // 强烈的霓虹光
-              break;
-            case 'time':
-              materialOptions.roughness = 0.6; // 古老的石质感
-              materialOptions.metalness = 0.3;
-              materialOptions.emissiveIntensity = 1.2;
-              break;
-            case 'forge':
-              materialOptions.emissiveIntensity = 2.0; // 炽热的熔岩效果
-              break;
-            case 'singularity':
-              materialOptions.emissiveIntensity = 2.0; // 强烈的能量效果
-              break;
-          }
-          
-          const material = new this.THREE.MeshStandardMaterial(materialOptions);
-          
-          const block = new this.THREE.Mesh(geometry, material);
-          const centerOffset = (size - 1) * (blockSize + gap) / 2;
-          block.position.set(
-            (x * (blockSize + gap)) - centerOffset,
-            (y * (blockSize + gap)) - centerOffset,
-            (z * (blockSize + gap)) - centerOffset
-          );
-          
-          // 检查是否需要添加引力方块
-          let isGravityBlock = false;
-          if (levelConfig && levelConfig.galaxyCoreMechanic === 'gravity') {
-            // 为第一个星系的关卡添加引力方块
-            // 简单规则：每10个方块中随机选择一个作为引力方块
-            if (Math.random() < 0.1) {
-              isGravityBlock = true;
+    // 检查是否有布局数据
+    if (levelConfig && levelConfig.layoutData) {
+      // 使用自定义布局
+      const layoutData = levelConfig.layoutData;
+      for (let y = 0; y < layoutData.length; y++) {
+        const row = layoutData[y].split(' ');
+        for (let z = 0; z < row.length; z++) {
+          const col = row[z];
+          for (let x = 0; x < col.length; x++) {
+            if (typeIndex >= typeArray.length) break;
+            if (col[x] === '1') {
+              const type = typeArray[typeIndex++];
+              const safeType = type % colors.length;
+              const color = colors[safeType];
+              
+              const geometry = new this.THREE.BoxGeometry(blockSize, blockSize, blockSize);
+              // 根据星系主题调整材质
+              let materialOptions = {
+                  color: 0xffffff,
+                  map: this.textureCache[type],
+                  roughness: 0.2,
+                  metalness: 0.5,
+                  emissive: color,
+                  emissiveIntensity: 1.0
+              };
+              
+              // 根据星系主题调整材质属性
+              switch(galaxyTheme) {
+                case 'soft':
+                  materialOptions.emissiveIntensity = 1.0; // 柔和的发光
+                  break;
+                case 'steampunk':
+                  materialOptions.roughness = 0.8; // 粗糙的金属感
+                  materialOptions.metalness = 0.8;
+                  materialOptions.emissiveIntensity = 1.2;
+                  break;
+                case 'fog':
+                  materialOptions.emissiveIntensity = 1.5; // 强烈的发光穿透迷雾
+                  break;
+                case 'gravity':
+                  materialOptions.roughness = 0.4; // 金属质感
+                  materialOptions.metalness = 0.7;
+                  materialOptions.emissiveIntensity = 1.2;
+                  break;
+                case 'cyber':
+                  materialOptions.emissiveIntensity = 1.8; // 强烈的霓虹光
+                  break;
+                case 'time':
+                  materialOptions.roughness = 0.6; // 古老的石质感
+                  materialOptions.metalness = 0.3;
+                  materialOptions.emissiveIntensity = 1.2;
+                  break;
+                case 'forge':
+                  materialOptions.emissiveIntensity = 2.0; // 炽热的熔岩效果
+                  break;
+                case 'singularity':
+                  materialOptions.emissiveIntensity = 2.0; // 强烈的能量效果
+                  break;
+              }
+              
+              const material = new this.THREE.MeshStandardMaterial(materialOptions);
+              
+              const block = new this.THREE.Mesh(geometry, material);
+              const centerOffset = (size - 1) * (blockSize + gap) / 2;
+              block.position.set(
+                (x * (blockSize + gap)) - centerOffset,
+                (y * (blockSize + gap)) - centerOffset,
+                (z * (blockSize + gap)) - centerOffset
+              );
+              
+              // 检查是否需要添加引力方块
+              let isGravityBlock = false;
+              if (levelConfig && levelConfig.galaxyCoreMechanic === 'gravity') {
+                // 为第一个星系的关卡添加引力方块
+                // 简单规则：每10个方块中随机选择一个作为引力方块
+                if (Math.random() < 0.1) {
+                  isGravityBlock = true;
+                }
+              }
+              
+              block.userData = {
+                color: color,
+                type: type,
+                position: { x, y, z },
+                initialY: block.position.y,
+                initialScale: 1,
+                randomOffset: Math.random() * 100, // 每个方块独立的随机偏移，用于呼吸动画
+                galaxyTheme: galaxyTheme,
+                isGravityBlock: isGravityBlock
+              };
+              
+              // 如果是引力方块，添加特殊效果
+              if (isGravityBlock) {
+                // 添加旋转箭头光环效果
+                const ringGeometry = new this.THREE.TorusGeometry(blockSize * 0.6, 2, 16, 100);
+                const ringMaterial = new this.THREE.MeshBasicMaterial({
+                  color: 0x00ffff,
+                  transparent: true,
+                  opacity: 0.7,
+                  side: this.THREE.DoubleSide
+                });
+                const ring = new this.THREE.Mesh(ringGeometry, ringMaterial);
+                const centerOffset = (size - 1) * (blockSize + gap) / 2;
+                ring.position.set(
+                  (x * (blockSize + gap)) - centerOffset,
+                  (y * (blockSize + gap)) - centerOffset,
+                  (z * (blockSize + gap)) - centerOffset
+                );
+                ring.rotation.x = Math.PI / 2;
+                ring.userData = { isGravityRing: true };
+                this.cubeGroup.add(ring);
+              }
+              
+              // 检查是否需要添加能量节点
+              if (levelConfig && levelConfig.galaxyCoreMechanic === 'energyNode') {
+                // 为第二个星系的关卡添加能量节点
+                // 简单规则：每15个方块中随机选择一个位置作为能量节点
+                if (Math.random() < 0.07) {
+                  this.createEnergyNode(x, y, z, blockSize, gap);
+                }
+              }
+              
+              // 检查是否需要添加病毒方块
+              if (levelConfig && levelConfig.galaxyCoreMechanic === 'dataOverload') {
+                // 为第五个星系的关卡添加病毒方块
+                // 简单规则：每10个方块中随机选择一个位置作为病毒方块
+                if (Math.random() < 0.1) {
+                  this.createVirusBlock(x, y, z, blockSize, gap);
+                }
+              }
+              
+              // 检查是否需要添加沙漏方块
+              if (levelConfig && levelConfig.galaxyCoreMechanic === 'hourglass') {
+                // 为第六个星系的关卡添加沙漏方块
+                // 简单规则：每15个方块中随机选择一个位置作为沙漏方块
+                if (Math.random() < 0.07) {
+                  this.createHourglassBlock(x, y, z, blockSize, gap);
+                }
+              }
+              
+              // 检查是否需要添加模块方块
+              if (levelConfig && levelConfig.galaxyCoreMechanic === 'moduleCombination') {
+                // 为第七个星系的关卡添加模块方块
+                // 简单规则：每12个方块中随机选择一个位置作为模块方块
+                if (Math.random() < 0.08) {
+                  this.createModuleBlock(x, y, z, blockSize, gap);
+                }
+              }
+              
+              // 检查是否需要添加相位方块
+              if (levelConfig && levelConfig.galaxyCoreMechanic === 'phaseSwitch') {
+                // 为第八个星系的关卡添加相位方块
+                // 简单规则：每10个方块中随机选择一个位置作为相位方块
+                if (Math.random() < 0.1) {
+                  this.createPhaseBlock(x, y, z, blockSize, gap);
+                }
+              }
+              
+              this.cubeGroup.add(block);
+              this.blocks.push(block);
             }
           }
-          
-          block.userData = {
-            color: color,
-            type: type,
-            position: { x, y, z },
-            initialY: block.position.y,
-            initialScale: 1,
-            randomOffset: Math.random() * 100, // 每个方块独立的随机偏移，用于呼吸动画
-            galaxyTheme: galaxyTheme,
-            isGravityBlock: isGravityBlock
-          };
-          
-          // 如果是引力方块，添加特殊效果
-          if (isGravityBlock) {
-            // 添加旋转箭头光环效果
-            const ringGeometry = new this.THREE.TorusGeometry(blockSize * 0.6, 2, 16, 100);
-            const ringMaterial = new this.THREE.MeshBasicMaterial({
-              color: 0x00ffff,
-              transparent: true,
-              opacity: 0.7,
-              side: this.THREE.DoubleSide
-            });
-            const ring = new this.THREE.Mesh(ringGeometry, ringMaterial);
+          if (typeIndex >= typeArray.length) break;
+        }
+        if (typeIndex >= typeArray.length) break;
+      }
+    } else {
+      // 使用默认立方体布局
+      for (let x = 0; x < size; x++) {
+        for (let y = 0; y < size; y++) {
+          for (let z = 0; z < size; z++) {
+            if (typeIndex >= typeArray.length) break;
+            
+            const type = typeArray[typeIndex++];
+            const safeType = type % colors.length;
+            const color = colors[safeType];
+            
+            const geometry = new this.THREE.BoxGeometry(blockSize, blockSize, blockSize);
+            // 根据星系主题调整材质
+            let materialOptions = {
+                color: 0xffffff,
+                map: this.textureCache[type],
+                roughness: 0.2,
+                metalness: 0.5,
+                emissive: color,
+                emissiveIntensity: 1.0
+            };
+            
+            // 根据星系主题调整材质属性
+            switch(galaxyTheme) {
+              case 'soft':
+                materialOptions.emissiveIntensity = 1.0; // 柔和的发光
+                break;
+              case 'steampunk':
+                materialOptions.roughness = 0.8; // 粗糙的金属感
+                materialOptions.metalness = 0.8;
+                materialOptions.emissiveIntensity = 1.2;
+                break;
+              case 'fog':
+                materialOptions.emissiveIntensity = 1.5; // 强烈的发光穿透迷雾
+                break;
+              case 'gravity':
+                materialOptions.roughness = 0.4; // 金属质感
+                materialOptions.metalness = 0.7;
+                materialOptions.emissiveIntensity = 1.2;
+                break;
+              case 'cyber':
+                materialOptions.emissiveIntensity = 1.8; // 强烈的霓虹光
+                break;
+              case 'time':
+                materialOptions.roughness = 0.6; // 古老的石质感
+                materialOptions.metalness = 0.3;
+                materialOptions.emissiveIntensity = 1.2;
+                break;
+              case 'forge':
+                materialOptions.emissiveIntensity = 2.0; // 炽热的熔岩效果
+                break;
+              case 'singularity':
+                materialOptions.emissiveIntensity = 2.0; // 强烈的能量效果
+                break;
+            }
+            
+            const material = new this.THREE.MeshStandardMaterial(materialOptions);
+            
+            const block = new this.THREE.Mesh(geometry, material);
             const centerOffset = (size - 1) * (blockSize + gap) / 2;
-            ring.position.set(
+            block.position.set(
               (x * (blockSize + gap)) - centerOffset,
               (y * (blockSize + gap)) - centerOffset,
               (z * (blockSize + gap)) - centerOffset
             );
-            ring.rotation.x = Math.PI / 2;
-            ring.userData = { isGravityRing: true };
-            this.cubeGroup.add(ring);
-          }
-          
-          // 检查是否需要添加能量节点
-          if (levelConfig && levelConfig.galaxyCoreMechanic === 'energyNode') {
-            // 为第二个星系的关卡添加能量节点
-            // 简单规则：每15个方块中随机选择一个位置作为能量节点
-            if (Math.random() < 0.07) {
-              this.createEnergyNode(x, y, z, blockSize, gap);
+            
+            // 检查是否需要添加引力方块
+            let isGravityBlock = false;
+            if (levelConfig && levelConfig.galaxyCoreMechanic === 'gravity') {
+              // 为第一个星系的关卡添加引力方块
+              // 简单规则：每10个方块中随机选择一个作为引力方块
+              if (Math.random() < 0.1) {
+                isGravityBlock = true;
+              }
             }
-          }
-          
-          // 检查是否需要添加病毒方块
-          if (levelConfig && levelConfig.galaxyCoreMechanic === 'dataOverload') {
-            // 为第五个星系的关卡添加病毒方块
-            // 简单规则：每10个方块中随机选择一个位置作为病毒方块
-            if (Math.random() < 0.1) {
-              this.createVirusBlock(x, y, z, blockSize, gap);
+            
+            block.userData = {
+              color: color,
+              type: type,
+              position: { x, y, z },
+              initialY: block.position.y,
+              initialScale: 1,
+              randomOffset: Math.random() * 100, // 每个方块独立的随机偏移，用于呼吸动画
+              galaxyTheme: galaxyTheme,
+              isGravityBlock: isGravityBlock
+            };
+            
+            // 如果是引力方块，添加特殊效果
+            if (isGravityBlock) {
+              // 添加旋转箭头光环效果
+              const ringGeometry = new this.THREE.TorusGeometry(blockSize * 0.6, 2, 16, 100);
+              const ringMaterial = new this.THREE.MeshBasicMaterial({
+                color: 0x00ffff,
+                transparent: true,
+                opacity: 0.7,
+                side: this.THREE.DoubleSide
+              });
+              const ring = new this.THREE.Mesh(ringGeometry, ringMaterial);
+              const centerOffset = (size - 1) * (blockSize + gap) / 2;
+              ring.position.set(
+                (x * (blockSize + gap)) - centerOffset,
+                (y * (blockSize + gap)) - centerOffset,
+                (z * (blockSize + gap)) - centerOffset
+              );
+              ring.rotation.x = Math.PI / 2;
+              ring.userData = { isGravityRing: true };
+              this.cubeGroup.add(ring);
             }
-          }
-          
-          // 检查是否需要添加沙漏方块
-          if (levelConfig && levelConfig.galaxyCoreMechanic === 'hourglass') {
-            // 为第六个星系的关卡添加沙漏方块
-            // 简单规则：每15个方块中随机选择一个位置作为沙漏方块
-            if (Math.random() < 0.07) {
-              this.createHourglassBlock(x, y, z, blockSize, gap);
+            
+            // 检查是否需要添加能量节点
+            if (levelConfig && levelConfig.galaxyCoreMechanic === 'energyNode') {
+              // 为第二个星系的关卡添加能量节点
+              // 简单规则：每15个方块中随机选择一个位置作为能量节点
+              if (Math.random() < 0.07) {
+                this.createEnergyNode(x, y, z, blockSize, gap);
+              }
             }
-          }
-          
-          // 检查是否需要添加模块方块
-          if (levelConfig && levelConfig.galaxyCoreMechanic === 'moduleCombination') {
-            // 为第七个星系的关卡添加模块方块
-            // 简单规则：每12个方块中随机选择一个位置作为模块方块
-            if (Math.random() < 0.08) {
-              this.createModuleBlock(x, y, z, blockSize, gap);
+            
+            // 检查是否需要添加病毒方块
+            if (levelConfig && levelConfig.galaxyCoreMechanic === 'dataOverload') {
+              // 为第五个星系的关卡添加病毒方块
+              // 简单规则：每10个方块中随机选择一个位置作为病毒方块
+              if (Math.random() < 0.1) {
+                this.createVirusBlock(x, y, z, blockSize, gap);
+              }
             }
-          }
-          
-          // 检查是否需要添加相位方块
-          if (levelConfig && levelConfig.galaxyCoreMechanic === 'phaseSwitch') {
-            // 为第八个星系的关卡添加相位方块
-            // 简单规则：每10个方块中随机选择一个位置作为相位方块
-            if (Math.random() < 0.1) {
-              this.createPhaseBlock(x, y, z, blockSize, gap);
+            
+            // 检查是否需要添加沙漏方块
+            if (levelConfig && levelConfig.galaxyCoreMechanic === 'hourglass') {
+              // 为第六个星系的关卡添加沙漏方块
+              // 简单规则：每15个方块中随机选择一个位置作为沙漏方块
+              if (Math.random() < 0.07) {
+                this.createHourglassBlock(x, y, z, blockSize, gap);
+              }
             }
+            
+            // 检查是否需要添加模块方块
+            if (levelConfig && levelConfig.galaxyCoreMechanic === 'moduleCombination') {
+              // 为第七个星系的关卡添加模块方块
+              // 简单规则：每12个方块中随机选择一个位置作为模块方块
+              if (Math.random() < 0.08) {
+                this.createModuleBlock(x, y, z, blockSize, gap);
+              }
+            }
+            
+            // 检查是否需要添加相位方块
+            if (levelConfig && levelConfig.galaxyCoreMechanic === 'phaseSwitch') {
+              // 为第八个星系的关卡添加相位方块
+              // 简单规则：每10个方块中随机选择一个位置作为相位方块
+              if (Math.random() < 0.1) {
+                this.createPhaseBlock(x, y, z, blockSize, gap);
+              }
+            }
+            
+            this.cubeGroup.add(block);
+            this.blocks.push(block);
           }
-          
-          this.cubeGroup.add(block);
-          this.blocks.push(block);
+          if (typeIndex >= typeArray.length) break;
         }
         if (typeIndex >= typeArray.length) break;
       }
-      if (typeIndex >= typeArray.length) break;
     }
     
     // 检查是否需要初始化迷雾
