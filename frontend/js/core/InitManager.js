@@ -121,8 +121,9 @@ class InitManager {
     this.game.camera = new this.game.THREE.PerspectiveCamera(75, this.game.windowWidth / this.game.windowHeight, 0.1, 1000);
     
     // 计算合适的相机距离
-    // 假设魔方最大尺寸约为 85 (3 * 25 + 2 * 2 + 额外空间)
-    const cubeSize = 90;
+    // 动态计算魔方尺寸，考虑最大可能的方块数量
+    const maxBlockSize = 30; // 最大方块大小
+    const maxCubeSize = 6 * (maxBlockSize + 2); // 6x6x6 魔方的最大尺寸
     // 视场角的一半转弧度
     const vFOV = this.game.camera.fov * Math.PI / 360; 
     // 根据屏幕宽高比计算水平视场角
@@ -135,10 +136,10 @@ class InitManager {
         // 竖屏模式：以宽度为基准，并考虑上下 UI 遮挡
         // 可视高度减少 40%
         const visibleHeightRatio = 0.6;
-        distance = (cubeSize / 2) / Math.tan(vFOV) / Math.min(aspect, visibleHeightRatio);
+        distance = (maxCubeSize / 2) / Math.tan(vFOV) / Math.min(aspect, visibleHeightRatio);
     } else {
         // 横屏模式
-        distance = (cubeSize / 2) / Math.tan(vFOV);
+        distance = (maxCubeSize / 2) / Math.tan(vFOV);
     }
     
     this.game.camera.position.z = distance * 1.5; // 稍微拉远一点，留出操作空间

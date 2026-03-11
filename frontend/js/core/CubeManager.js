@@ -133,21 +133,33 @@ class CubeManager {
         }
     }
     
-    // 根据屏幕宽度计算方块大小，确保横向能显示6个
+    // 根据屏幕宽度计算方块大小，确保横向能显示6个方块
     const cubeWidthBlocks = 6;
     const padding = 40;
     const availableWidth = this.game.windowWidth - padding * 2;
     const blockSize = Math.floor(availableWidth / cubeWidthBlocks);
     
-    // 根据方块大小和可用宽度计算魔方尺寸
-    let size = 3;
+    // 固定魔方尺寸为6x6x6，确保横向显示6个方块
+    let size = 6;
+    // 确保魔方宽度不超过可用宽度
     const cubeWidth = size * (blockSize + gap) - gap;
-    if (cubeWidth < availableWidth * 0.7 && blockCount > 27) {
-        size = 4;
+    if (cubeWidth > availableWidth) {
+        size = cubeWidthBlocks;
     }
-    if (size * (blockSize + gap) - gap > availableWidth) {
-        size = 3;
+    
+    // 调整相机距离，确保能看到整个魔方
+    const actualCubeSize = size * (blockSize + gap);
+    const vFOV = this.game.camera.fov * Math.PI / 360;
+    const aspect = this.game.windowWidth / this.game.windowHeight;
+    let distance;
+    if (aspect < 1) {
+        const visibleHeightRatio = 0.6;
+        distance = (actualCubeSize / 2) / Math.tan(vFOV) / Math.min(aspect, visibleHeightRatio);
+    } else {
+        distance = (actualCubeSize / 2) / Math.tan(vFOV);
     }
+    this.game.camera.position.z = distance * 1.5;
+    this.game.camera.lookAt(0, 0, 0);
     
     // 创建方块
     let typeIndex = 0;
