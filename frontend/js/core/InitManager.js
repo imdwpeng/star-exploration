@@ -146,11 +146,11 @@ class InitManager {
     this.game.camera.lookAt(0, 0, 0);
     
     // 根据星系主题设置灯光
-    const ambientLight = new this.game.THREE.AmbientLight(0xffffff, 0.7); // 提高环境光强度，改回纯白
+    const ambientLight = new this.game.THREE.AmbientLight(0xffffff, 1.0); // 提高环境光强度
     this.game.scene.add(ambientLight);
     
     // 主光源：日光 (模仿恒星)
-    const sunLight = new this.game.THREE.DirectionalLight(0xffffff, 1.0); // 提高强度
+    const sunLight = new this.game.THREE.DirectionalLight(0xffffff, 1.5); // 提高强度
     sunLight.position.set(10, 20, 10);
     this.game.scene.add(sunLight);
 
@@ -195,12 +195,12 @@ class InitManager {
     }
 
     // 补光1
-    const light1 = new this.game.THREE.PointLight(light1Color, 0.8, 500);
+    const light1 = new this.game.THREE.PointLight(light1Color, 1.2, 500);
     light1.position.set(-20, 10, 20);
     this.game.scene.add(light1);
 
     // 补光2
-    const light2 = new this.game.THREE.PointLight(light2Color, 0.8, 500);
+    const light2 = new this.game.THREE.PointLight(light2Color, 1.2, 500);
     light2.position.set(20, -10, 20);
     this.game.scene.add(light2);
 

@@ -163,11 +163,10 @@ class CubeManager {
     
     // 创建方块
     let typeIndex = 0;
-    const halfSize = Math.floor(size / 2);
     
-    for (let x = -halfSize; x <= halfSize; x++) {
-      for (let y = -halfSize; y <= halfSize; y++) {
-        for (let z = -halfSize; z <= halfSize; z++) {
+    for (let x = 0; x < size; x++) {
+      for (let y = 0; y < size; y++) {
+        for (let z = 0; z < size; z++) {
           if (typeIndex >= typeArray.length) break;
           
           const type = typeArray[typeIndex++];
@@ -182,47 +181,51 @@ class CubeManager {
               roughness: 0.2,
               metalness: 0.5,
               emissive: color,
-              emissiveIntensity: 0.5
+              emissiveIntensity: 1.0
           };
           
           // 根据星系主题调整材质属性
           switch(galaxyTheme) {
             case 'soft':
-              materialOptions.emissiveIntensity = 0.3; // 柔和的发光
+              materialOptions.emissiveIntensity = 1.0; // 柔和的发光
               break;
             case 'steampunk':
               materialOptions.roughness = 0.8; // 粗糙的金属感
               materialOptions.metalness = 0.8;
+              materialOptions.emissiveIntensity = 1.2;
               break;
             case 'fog':
-              materialOptions.emissiveIntensity = 0.7; // 强烈的发光穿透迷雾
+              materialOptions.emissiveIntensity = 1.5; // 强烈的发光穿透迷雾
               break;
             case 'gravity':
               materialOptions.roughness = 0.4; // 金属质感
               materialOptions.metalness = 0.7;
+              materialOptions.emissiveIntensity = 1.2;
               break;
             case 'cyber':
-              materialOptions.emissiveIntensity = 0.8; // 强烈的霓虹光
+              materialOptions.emissiveIntensity = 1.8; // 强烈的霓虹光
               break;
             case 'time':
               materialOptions.roughness = 0.6; // 古老的石质感
               materialOptions.metalness = 0.3;
+              materialOptions.emissiveIntensity = 1.2;
               break;
             case 'forge':
-              materialOptions.emissiveIntensity = 0.9; // 炽热的熔岩效果
+              materialOptions.emissiveIntensity = 2.0; // 炽热的熔岩效果
               break;
             case 'singularity':
-              materialOptions.emissiveIntensity = 1.0; // 强烈的能量效果
+              materialOptions.emissiveIntensity = 2.0; // 强烈的能量效果
               break;
           }
           
           const material = new this.THREE.MeshStandardMaterial(materialOptions);
           
           const block = new this.THREE.Mesh(geometry, material);
+          const centerOffset = (size - 1) * (blockSize + gap) / 2;
           block.position.set(
-            x * (blockSize + gap),
-            y * (blockSize + gap),
-            z * (blockSize + gap)
+            (x * (blockSize + gap)) - centerOffset,
+            (y * (blockSize + gap)) - centerOffset,
+            (z * (blockSize + gap)) - centerOffset
           );
           
           // 检查是否需要添加引力方块
@@ -257,7 +260,12 @@ class CubeManager {
               side: this.THREE.DoubleSide
             });
             const ring = new this.THREE.Mesh(ringGeometry, ringMaterial);
-            ring.position.copy(block.position);
+            const centerOffset = (size - 1) * (blockSize + gap) / 2;
+            ring.position.set(
+              (x * (blockSize + gap)) - centerOffset,
+              (y * (blockSize + gap)) - centerOffset,
+              (z * (blockSize + gap)) - centerOffset
+            );
             ring.rotation.x = Math.PI / 2;
             ring.userData = { isGravityRing: true };
             this.cubeGroup.add(ring);
@@ -511,10 +519,11 @@ class CubeManager {
     });
     
     const node = new this.THREE.Mesh(geometry, material);
+    const centerOffset = (size - 1) * (blockSize + gap) / 2;
     node.position.set(
-      x * (blockSize + gap),
-      y * (blockSize + gap),
-      z * (blockSize + gap)
+      (x * (blockSize + gap)) - centerOffset,
+      (y * (blockSize + gap)) - centerOffset,
+      (z * (blockSize + gap)) - centerOffset
     );
     
     // 设置能量节点的用户数据
@@ -770,10 +779,11 @@ class CubeManager {
     });
     
     const virus = new this.THREE.Mesh(geometry, material);
+    const centerOffset = (size - 1) * (blockSize + gap) / 2;
     virus.position.set(
-      x * (blockSize + gap),
-      y * (blockSize + gap),
-      z * (blockSize + gap)
+      (x * (blockSize + gap)) - centerOffset,
+      (y * (blockSize + gap)) - centerOffset,
+      (z * (blockSize + gap)) - centerOffset
     );
     
     // 设置病毒方块的用户数据
@@ -828,10 +838,11 @@ class CubeManager {
     });
     
     const hourglass = new this.THREE.Mesh(geometry, material);
+    const centerOffset = (size - 1) * (blockSize + gap) / 2;
     hourglass.position.set(
-      x * (blockSize + gap),
-      y * (blockSize + gap),
-      z * (blockSize + gap)
+      (x * (blockSize + gap)) - centerOffset,
+      (y * (blockSize + gap)) - centerOffset,
+      (z * (blockSize + gap)) - centerOffset
     );
     
     // 设置沙漏方块的用户数据
@@ -874,10 +885,11 @@ class CubeManager {
     });
     
     const module = new this.THREE.Mesh(geometry, material);
+    const centerOffset = (size - 1) * (blockSize + gap) / 2;
     module.position.set(
-      x * (blockSize + gap),
-      y * (blockSize + gap),
-      z * (blockSize + gap)
+      (x * (blockSize + gap)) - centerOffset,
+      (y * (blockSize + gap)) - centerOffset,
+      (z * (blockSize + gap)) - centerOffset
     );
     
     // 设置模块方块的用户数据
@@ -920,10 +932,11 @@ class CubeManager {
     });
     
     const phase = new this.THREE.Mesh(geometry, material);
+    const centerOffset = (size - 1) * (blockSize + gap) / 2;
     phase.position.set(
-      x * (blockSize + gap),
-      y * (blockSize + gap),
-      z * (blockSize + gap)
+      (x * (blockSize + gap)) - centerOffset,
+      (y * (blockSize + gap)) - centerOffset,
+      (z * (blockSize + gap)) - centerOffset
     );
     
     // 设置相位方块的用户数据
