@@ -54,7 +54,6 @@ class CubeManager {
 
   createCube(levelConfig) {
     this.blocks = [];
-    const blockSize = 25;
     const gap = 2;
     
     // 根据关卡配置获取方块数量和类型
@@ -134,11 +133,21 @@ class CubeManager {
         }
     }
     
-    // 根据关卡配置确定魔方尺寸
-    let size = 3; // 默认3x3x3
-    if (blockCount > 27) size = 4; // 4x4x4
-    if (blockCount > 64) size = 5; // 5x5x5
-    if (blockCount > 125) size = 6; // 6x6x6
+    // 根据屏幕宽度计算方块大小，确保横向能显示6个
+    const cubeWidthBlocks = 6;
+    const padding = 40;
+    const availableWidth = this.game.windowWidth - padding * 2;
+    const blockSize = Math.floor(availableWidth / cubeWidthBlocks);
+    
+    // 根据方块大小和可用宽度计算魔方尺寸
+    let size = 3;
+    const cubeWidth = size * (blockSize + gap) - gap;
+    if (cubeWidth < availableWidth * 0.7 && blockCount > 27) {
+        size = 4;
+    }
+    if (size * (blockSize + gap) - gap > availableWidth) {
+        size = 3;
+    }
     
     // 创建方块
     let typeIndex = 0;
@@ -930,10 +939,13 @@ class CubeManager {
         const startY = (-worldPos.y + 1) * this.game.windowHeight / 2;
         
         // 计算终点 (UI 槽位坐标)
-        const slotWidth = 40;
+        const slotCount = 8;
+        const padding = 20;
         const gap = 5;
-        const slotHeight = 40;
-        const totalWidth = 8 * slotWidth + 7 * gap;
+        const availableWidth = this.game.windowWidth - padding * 2;
+        const slotWidth = Math.floor((availableWidth - (slotCount - 1) * gap) / slotCount);
+        const slotHeight = slotWidth;
+        const totalWidth = slotCount * slotWidth + (slotCount - 1) * gap;
         const slotStartX = (this.game.windowWidth - totalWidth) / 2;
         const slotStartY = this.game.windowHeight - 80 - 20 - slotHeight;
         

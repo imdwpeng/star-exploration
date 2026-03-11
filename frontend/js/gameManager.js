@@ -28,7 +28,7 @@ class GameManager {
       ecology: 0
     };
     
-    // 待消除槽 (改为8个)
+    // 待消除槽 (8个)
     this.eliminationSlots = new Array(8).fill(null).map(() => ({ block: null, highlight: false }));
     
     // 倒计时 (单位: 秒)

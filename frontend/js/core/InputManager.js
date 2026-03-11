@@ -46,12 +46,14 @@ class InputManager {
 
   checkEliminationSlots(x, y) {
     const slots = this.game.gameManager.eliminationSlots;
-    const slotWidth = 40; // 缩小一点以放下8个
-    const slotHeight = 40;
+    const slotCount = slots.length;
+    const padding = 20;
     const gap = 5;
-    const totalWidth = slots.length * slotWidth + (slots.length - 1) * gap;
+    const availableWidth = this.game.windowWidth - padding * 2;
+    const slotWidth = Math.floor((availableWidth - (slotCount - 1) * gap) / slotCount);
+    const slotHeight = slotWidth;
+    const totalWidth = slotCount * slotWidth + (slotCount - 1) * gap;
     const startX = (this.game.windowWidth - totalWidth) / 2;
-    // 调整到倒计时条上方
     const startY = this.game.windowHeight - 80 - 20 - slotHeight;
     
     // 检查是否在Y轴范围内

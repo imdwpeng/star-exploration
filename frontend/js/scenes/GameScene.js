@@ -63,10 +63,13 @@ class GameScene {
     const eliminationInfo = this.game.gameManager.update(deltaTime);
     if (eliminationInfo && eliminationInfo.eliminated) {
         // 播放消除特效
-        const slotWidth = 40;
+        const slotCount = 8;
+        const padding = 20;
         const gap = 5;
-        const slotHeight = 40;
-        const totalWidth = 8 * slotWidth + 7 * gap; // Fixed 8 slots
+        const availableWidth = this.game.windowWidth - padding * 2;
+        const slotWidth = Math.floor((availableWidth - (slotCount - 1) * gap) / slotCount);
+        const slotHeight = slotWidth;
+        const totalWidth = slotCount * slotWidth + (slotCount - 1) * gap;
         const startX = (this.game.windowWidth - totalWidth) / 2;
         const startY = this.game.windowHeight - 80 - 20 - slotHeight; 
         
