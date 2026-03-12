@@ -65,7 +65,7 @@ class CubeManager {
     let colors = [];
     switch(galaxyTheme) {
       case 'soft': // 新星摇篮
-        colors = [0x00ffff, 0x00ffab, 0x9C88FF, 0x00D4FF, 0xffffff, 0xE6E6E6];
+        colors = [0x81D4FA, 0xA5D6A7, 0xB39DDB, 0x4FC3F7, 0x9575CD, 0x64B5F6];
         break;
       case 'steampunk': // 锈蚀星带
         colors = [0xFF9A3C, 0x95a5a6, 0x3B3B98, 0x34495e, 0xffffff, 0xE6E6E6];
@@ -183,55 +183,68 @@ class CubeManager {
               // 根据星系主题调整材质
               let materialOptions = {
                   color: 0xffffff,
-                  map: this.textureCache[type],
-                  roughness: 0.2,
-                  metalness: 0.5,
+                  map: null, // 暂时禁用纹理以提高亮度
+                  roughness: 0.5,
+                  metalness: 0.0,
                   emissive: color,
-                  emissiveIntensity: 1.0
+                  emissiveIntensity: 1.2
               };
               
               // 根据星系主题调整材质属性
               switch(galaxyTheme) {
                 case 'soft':
-                  materialOptions.emissiveIntensity = 1.0; // 柔和的发光
+                  materialOptions.emissiveIntensity = 1.5; // 柔和的发光
+                  materialOptions.roughness = 0.6;
                   break;
                 case 'steampunk':
                   materialOptions.roughness = 0.8; // 粗糙的金属感
-                  materialOptions.metalness = 0.8;
-                  materialOptions.emissiveIntensity = 1.2;
-                  break;
-                case 'fog':
-                  materialOptions.emissiveIntensity = 1.5; // 强烈的发光穿透迷雾
-                  break;
-                case 'gravity':
-                  materialOptions.roughness = 0.4; // 金属质感
-                  materialOptions.metalness = 0.7;
-                  materialOptions.emissiveIntensity = 1.2;
-                  break;
-                case 'cyber':
-                  materialOptions.emissiveIntensity = 1.8; // 强烈的霓虹光
-                  break;
-                case 'time':
-                  materialOptions.roughness = 0.6; // 古老的石质感
                   materialOptions.metalness = 0.3;
                   materialOptions.emissiveIntensity = 1.2;
                   break;
+                case 'fog':
+                  materialOptions.emissiveIntensity = 1.8; // 强烈的发光穿透迷雾
+                  materialOptions.roughness = 0.6;
+                  break;
+                case 'gravity':
+                  materialOptions.roughness = 0.7; // 金属质感
+                  materialOptions.metalness = 0.2;
+                  materialOptions.emissiveIntensity = 1.5;
+                  break;
+                case 'cyber':
+                  materialOptions.emissiveIntensity = 2.0; // 强烈的霓虹光
+                  materialOptions.roughness = 0.4;
+                  break;
+                case 'time':
+                  materialOptions.roughness = 0.7; // 古老的石质感
+                  materialOptions.metalness = 0.1;
+                  materialOptions.emissiveIntensity = 1.5;
+                  break;
                 case 'forge':
-                  materialOptions.emissiveIntensity = 2.0; // 炽热的熔岩效果
+                  materialOptions.emissiveIntensity = 2.2; // 炽热的熔岩效果
+                  materialOptions.roughness = 0.5;
                   break;
                 case 'singularity':
-                  materialOptions.emissiveIntensity = 2.0; // 强烈的能量效果
+                  materialOptions.emissiveIntensity = 2.2; // 强烈的能量效果
+                  materialOptions.roughness = 0.4;
                   break;
               }
               
               const material = new this.THREE.MeshStandardMaterial(materialOptions);
               
               const block = new this.THREE.Mesh(geometry, material);
-              const centerOffset = (size - 1) * (blockSize + gap) / 2;
+              // 使用 layoutData 的实际大小计算中心偏移
+              const layerHeight = layoutData.length;
+              const rowDepth = layer.length;
+              const colWidth = row.length;
+              
+              const centerOffsetX = (colWidth - 1) * (blockSize + gap) / 2;
+              const centerOffsetY = (layerHeight - 1) * (blockSize + gap) / 2;
+              const centerOffsetZ = (rowDepth - 1) * (blockSize + gap) / 2;
+              
               block.position.set(
-                (x * (blockSize + gap)) - centerOffset,
-                (y * (blockSize + gap)) - centerOffset,
-                (z * (blockSize + gap)) - centerOffset
+                (x * (blockSize + gap)) - centerOffsetX,
+                (y * (blockSize + gap)) - centerOffsetY,
+                (z * (blockSize + gap)) - centerOffsetZ
               );
               
               // 检查是否需要添加引力方块
@@ -266,11 +279,10 @@ class CubeManager {
                   side: this.THREE.DoubleSide
                 });
                 const ring = new this.THREE.Mesh(ringGeometry, ringMaterial);
-                const centerOffset = (size - 1) * (blockSize + gap) / 2;
                 ring.position.set(
-                  (x * (blockSize + gap)) - centerOffset,
-                  (y * (blockSize + gap)) - centerOffset,
-                  (z * (blockSize + gap)) - centerOffset
+                  (x * (blockSize + gap)) - centerOffsetX,
+                  (y * (blockSize + gap)) - centerOffsetY,
+                  (z * (blockSize + gap)) - centerOffsetZ
                 );
                 ring.rotation.x = Math.PI / 2;
                 ring.userData = { isGravityRing: true };
