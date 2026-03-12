@@ -169,12 +169,12 @@ class CubeManager {
       // 使用自定义布局
       const layoutData = levelConfig.layoutData;
       for (let y = 0; y < layoutData.length; y++) {
-        const row = layoutData[y].split(' ');
-        for (let z = 0; z < row.length; z++) {
-          const col = row[z];
-          for (let x = 0; x < col.length; x++) {
+        const layer = layoutData[y];
+        for (let z = 0; z < layer.length; z++) {
+          const row = layer[z];
+          for (let x = 0; x < row.length; x++) {
             if (typeIndex >= typeArray.length) break;
-            if (col[x] === '1') {
+            if (row[x] === 1) {
               const type = typeArray[typeIndex++];
               const safeType = type % colors.length;
               const color = colors[safeType];

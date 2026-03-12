@@ -1053,7 +1053,7 @@ const LevelConfig = {
   ],
 
   // 计算关卡的方块总数
-  calculateBlockCount(layoutData) {
+  calculateBlockCount: function(layoutData) {
     let count = 0;
     for (const layer of layoutData) {
       for (const row of layer) {
@@ -1063,18 +1063,18 @@ const LevelConfig = {
       }
     }
     return count;
-  }
+  },
 
   // 生成关卡布局描述
-  generateLayoutDescription(layoutData) {
+  generateLayoutDescription: function(layoutData) {
     const layers = layoutData.length;
     const rows = layoutData[0].length;
     const cols = layoutData[0][0].length;
     return `${layers}层(${cols}x${rows}x${layers})`;
-  }
+  },
 
   // 根据星系ID和关卡ID获取关卡配置
-  getLevelConfig(galaxyId, levelId) {
+  getLevelConfig: function(galaxyId, levelId) {
     const galaxy = this.galaxies.find(g => g.id === galaxyId);
     if (!galaxy) return null;
     

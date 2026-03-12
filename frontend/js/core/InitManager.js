@@ -1,5 +1,5 @@
 // 初始化管理器 - 负责游戏的初始化流程
-const LevelConfig = require('./LevelConfig').default;
+const LevelConfig = require('./LevelConfig.js').default;
 
 class InitManager {
   constructor(game, GameManager, SceneManager, StartScene, LevelSelectScene, GameScene) {
