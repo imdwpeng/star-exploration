@@ -6,7 +6,10 @@ class GalaxyManager {
   }
 
   createGalaxy(galaxyTheme = 'soft') {
-    // 创建星系容器
+    // 先根据星系主题创建图片背景
+    this.createBackgroundByTheme(galaxyTheme);
+
+    // 创建星系容器（粒子星系，叠加在图片背景前面）
     this.galaxyGroup = new this.THREE.Group();
     this.galaxyGroup.position.set(0, 0, -450); // 稍微拉近一点，使其填充更多背景
     
@@ -257,6 +260,46 @@ class GalaxyManager {
 
     // 3. 背景背景星星 (更远、更暗、增加空间感)
     this.createBackgroundStars(2000, galaxyTheme);
+  }
+
+  // 根据星系主题，用一张图片作为场景背景纹理（Scene.background），不会挡住 3D 魔方
+  createBackgroundByTheme(galaxyTheme = 'soft') {
+    // 如果以前已经设置过背景纹理，可以选择性清理，这里先简单覆盖
+
+    // 不同星系对应的图片路径（你已有的 1.png - 8.png）
+    const backgroundMap = {
+      // 这里用相对路径，不以 / 开头，等价于和 game.js 同级的 images 目录
+      soft: 'images/1.png',        // 新星摇篮
+      steampunk: 'images/2.png',   // 锈蚀星带
+      fog: 'images/3.png',         // 星云迷雾
+      gravity: 'images/4.png',     // 重力熔炉
+      cyber: 'images/5.png',       // 数据洪流
+      time: 'images/6.png',        // 时裔圣所
+      forge: 'images/7.png',       // 铸星熔炉
+      singularity: 'images/8.png'  // 终末奇点
+    };
+
+    const url = backgroundMap[galaxyTheme] || backgroundMap.soft;
+
+    // 使用微信小游戏的 wx.createImage 加载图片，避免 DOM createImage 相关报错
+    const texture = new this.THREE.Texture();
+    const img = wx.createImage();
+    img.onload = () => {
+      texture.image = img;
+      texture.needsUpdate = true;
+      texture.minFilter = this.THREE.LinearFilter;
+      texture.magFilter = this.THREE.LinearFilter;
+      console.log('[GalaxyBackground] image loaded:', url);
+      
+      // 设置为场景背景纹理，这样在 3D 渲染时自动作为背景，不挡住魔方
+      this.game.scene.background = texture;
+    };
+    img.onerror = (e) => {
+      console.error('[GalaxyBackground] image load error:', url, e);
+    };
+    img.src = url;
+
+    // 不再创建 3D 平面，只使用 Scene.background 作为背景
   }
 
   createBackgroundStars(count = 500, galaxyTheme = 'soft') {

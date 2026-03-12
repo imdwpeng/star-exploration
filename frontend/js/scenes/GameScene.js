@@ -104,7 +104,7 @@ class GameScene {
     ctx.save();
     // 缩放以匹配逻辑像素
     ctx.scale(this.game.pixelRatio, this.game.pixelRatio);
-    
+        
     // 绘制顶部资源栏
     this.game.uiManager.drawTopBar(ctx);
     
