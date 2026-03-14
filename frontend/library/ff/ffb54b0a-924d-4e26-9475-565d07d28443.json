@@ -1,6 +1,6 @@
 {
   "__type__": "cc.Material",
-  "_name": "builtin-bloom",
+  "_name": "builtin-kawase-bloom",
   "_objFlags": 0,
   "__editorExtras__": {},
   "_native": "",

@@ -1736,7 +1736,7 @@
     "versionCode": 1
   },
   "10f0d9bc-5c9e-4216-9a94-f3a2ff53bb5f": {
-    "url": "db://internal/effects/pipeline/post-process/bloom1.effect",
+    "url": "db://internal/effects/pipeline/post-process/bloom-kawase-dual.effect",
     "value": {
       "depends": []
     },
@@ -1915,7 +1915,7 @@
   "1263d74c-8167-4928-91a6-4e2672411f47": {
     "url": "db://internal/primitives.fbx",
     "value": {},
-    "versionCode": 1
+    "versionCode": 3
   },
   "52ef29ed-bd92-4e94-ab2f-0ebc91bf3a60": {
     "url": "db://internal/default-terrain/default-layer-texture.jpg",
@@ -2225,7 +2225,7 @@
       "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "90e8b0d4-12dc-412d-9156-ea1fdb18c15b": {
     "url": "db://internal/default_prefab/Terrain.prefab",
@@ -2233,10 +2233,10 @@
       "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "ffb54b0a-924d-4e26-9475-565d07d28443": {
-    "url": "db://internal/default_renderpipeline/builtin-bloom.mtl",
+    "url": "db://internal/default_renderpipeline/builtin-kawase-bloom.mtl",
     "value": {
       "depends": [
         "10f0d9bc-5c9e-4216-9a94-f3a2ff53bb5f"
@@ -3226,7 +3226,7 @@
         "b2bd1fa7-8d7c-49c5-a158-df29a6d3a594"
       ]
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "e6914174-8ecd-4c99-8e9b-9773a9d368df": {
     "url": "db://internal/tools/parsed-effect-info.json",
@@ -3267,7 +3267,7 @@
     "value": {
       "depends": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "e0a8e34d-9242-4f0f-833b-f57e1ffbf285": {
     "url": "db://internal/default_file_content/animation-graph/default.animgraph",
@@ -3351,7 +3351,7 @@
       "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "c7e748e8-be82-4f6f-b2c0-085b604e40e5": {
     "url": "db://internal/default_file_content/render-pipeline/default.rpp",
@@ -3378,35 +3378,31 @@
     "url": "db://internal/default_file_content/scene/default.scene",
     "value": {
       "depends": [
-        "3b7550e2-beea-4079-ad8d-dfef104086bd",
         "d032ac98-05e1-4090-88bb-eb640dcb5fc1@b47c0",
         "6f01cf7f-81bf-4a7e-bd5d-0afc19696480@b47c0"
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "0359b2f1-3a37-43fa-9c1c-bbe2b353ea1f": {
     "url": "db://internal/default_file_content/scene/scene-2d.scene",
     "value": {
-      "depends": [
-        "0359b2f1-3a37-43fa-9c1c-bbe2b353ea1f"
-      ],
+      "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "1d5e3139-1826-4b4a-8c4c-2e7b6874a474": {
     "url": "db://internal/default_file_content/scene/scene-quality.scene",
     "value": {
       "depends": [
-        "1d5e3139-1826-4b4a-8c4c-2e7b6874a474",
         "d032ac98-05e1-4090-88bb-eb640dcb5fc1@b47c0",
         "6f01cf7f-81bf-4a7e-bd5d-0afc19696480@b47c0"
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "d4291b1a-5207-4c88-b981-348fbf50dc68": {
     "url": "db://internal/default_file_content/terrain/default.terrain",
@@ -3585,7 +3581,7 @@
       "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "744d520a-8483-4fbc-a47b-ab57d28d6203@f9941": {
     "url": "db://internal/default_fonts/builtin-bitmap/OpenSans-Regular_0.png@f9941",
@@ -3605,7 +3601,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "6350d660-e888-4acf-a552-f3b719ae9110": {
     "url": "db://internal/default_prefab/3d/Cone.prefab",
@@ -3616,7 +3612,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "30da77a1-f02d-4ede-aa56-403452ee7fde": {
     "url": "db://internal/default_prefab/3d/Cube.prefab",
@@ -3627,7 +3623,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "ab3e16f9-671e-48a7-90b7-d0884d9cbb85": {
     "url": "db://internal/default_prefab/3d/Cylinder.prefab",
@@ -3638,7 +3634,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "40563723-f8fc-4216-99ea-a81636435c10": {
     "url": "db://internal/default_prefab/3d/Plane.prefab",
@@ -3649,7 +3645,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "34a07346-9f62-4a84-90ae-cb83f7a426c1": {
     "url": "db://internal/default_prefab/3d/Quad.prefab",
@@ -3660,7 +3656,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "655c9519-1a37-472b-bae6-29fefac0b550": {
     "url": "db://internal/default_prefab/3d/Sphere.prefab",
@@ -3671,7 +3667,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "d47f5d5e-c931-4ff4-987b-cc818a728b82": {
     "url": "db://internal/default_prefab/3d/Torus.prefab",
@@ -3682,7 +3678,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "f09a0597-10e6-49e5-8759-a148b5e85395": {
     "url": "db://internal/default_prefab/effects/Particle System.prefab",
@@ -3693,7 +3689,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "a0e9756d-9128-4f49-8097-e041c8b733b8": {
     "url": "db://internal/default_prefab/light/Directional Light.prefab",
@@ -3701,7 +3697,7 @@
       "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "50dfda40-7c45-4868-a876-2fe2a4c782f4": {
     "url": "db://internal/default_prefab/light/Light Probe Group.prefab",
@@ -3709,7 +3705,7 @@
       "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "03029371-ee64-4f14-820a-d495ad7cdc29": {
     "url": "db://internal/default_prefab/light/Point Light.prefab",
@@ -3717,7 +3713,7 @@
       "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "df72d0f6-49d3-452a-b082-8b23d38b33af": {
     "url": "db://internal/default_prefab/light/Ranged Directional Light.prefab",
@@ -3725,7 +3721,7 @@
       "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "d8b49b64-cfba-4cfa-be53-1e469547b28b": {
     "url": "db://internal/default_prefab/light/Reflection Probe.prefab",
@@ -3733,7 +3729,7 @@
       "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "4182ee46-ffa0-4de2-b66b-c93cc6c7e9b8": {
     "url": "db://internal/default_prefab/light/Sphere Light.prefab",
@@ -3741,7 +3737,7 @@
       "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "7a49aa24-bd7a-40a8-b31a-b2a9da85abcd": {
     "url": "db://internal/default_prefab/light/Spot Light.prefab",
@@ -3749,7 +3745,7 @@
       "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "90bdd2a9-2838-4888-b66c-e94c8b7a5169": {
     "url": "db://internal/default_prefab/ui/Button.prefab",
@@ -3761,7 +3757,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "f773db21-62b8-4540-956a-29bacf5ddbf5": {
     "url": "db://internal/default_prefab/ui/Canvas.prefab",
@@ -3771,7 +3767,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "05e79121-8675-4551-9ad7-1b901a4025db": {
     "url": "db://internal/default_prefab/ui/EditBox.prefab",
@@ -3781,7 +3777,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "c96e159e-43ea-4a16-8279-05bc39119d1a": {
     "url": "db://internal/default_prefab/ui/Graphics.prefab",
@@ -3789,7 +3785,7 @@
       "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "36008810-7ad3-47c0-8112-e30aee089e45": {
     "url": "db://internal/default_prefab/ui/Label.prefab",
@@ -3797,7 +3793,7 @@
       "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "a9ef7dfc-ea8b-4cf8-918e-36da948c4de0": {
     "url": "db://internal/default_prefab/ui/Layout.prefab",
@@ -3805,7 +3801,7 @@
       "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "7fa63aed-f3e2-46a5-8a7c-c1a1adf6cea6": {
     "url": "db://internal/default_prefab/ui/Mask.prefab",
@@ -3815,7 +3811,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "20a5d8cb-ccad-4543-a937-fccd98c9f3de": {
     "url": "db://internal/default_prefab/ui/pageView.prefab",
@@ -3827,7 +3823,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "f396261e-3e06-41ec-bdd6-9a8b6d99026f": {
     "url": "db://internal/default_prefab/ui/ParticleSystem2D.prefab",
@@ -3839,7 +3835,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "0d9353c4-6fb9-49bb-bc62-77f1750078c2": {
     "url": "db://internal/default_prefab/ui/ProgressBar.prefab",
@@ -3850,7 +3846,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "fc6bfcfa-8086-4326-809b-0ba1226bac7d": {
     "url": "db://internal/default_prefab/ui/RichText.prefab",
@@ -3860,7 +3856,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "c1baa707-78d6-4b89-8d5d-0b7fdf0c39bc": {
     "url": "db://internal/default_prefab/ui/ScrollView.prefab",
@@ -3872,7 +3868,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "2bd7e5b6-cd8c-41a1-8136-ddb8efbf6326": {
     "url": "db://internal/default_prefab/ui/Slider.prefab",
@@ -3884,7 +3880,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "9db8cd0b-cbe4-42e7-96a9-a239620c0a9d": {
     "url": "db://internal/default_prefab/ui/Sprite.prefab",
@@ -3894,7 +3890,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "279ed042-5a65-4efe-9afb-2fc23c61e15a": {
     "url": "db://internal/default_prefab/ui/SpriteRenderer.prefab",
@@ -3905,7 +3901,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "e5f21aad-3a69-4011-ac62-b74352ac025e": {
     "url": "db://internal/default_prefab/ui/SpriteSplash.prefab",
@@ -3915,7 +3911,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "3139fa4f-8c42-4ce6-98be-15e848d9734c": {
     "url": "db://internal/default_prefab/ui/TiledMap.prefab",
@@ -3925,7 +3921,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "0e89afe7-56de-4f99-96a1-cba8a75bedd2": {
     "url": "db://internal/default_prefab/ui/Toggle.prefab",
@@ -3936,7 +3932,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "2af73429-41d1-4346-9062-7798e42945dd": {
     "url": "db://internal/default_prefab/ui/ToggleContainer.prefab",
@@ -3948,7 +3944,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "7e089eaf-fa97-40d7-8a20-741a152585df": {
     "url": "db://internal/default_prefab/ui/VideoPlayer.prefab",
@@ -3959,7 +3955,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "9c541fa2-1dc8-4d8b-813a-aec89133f5b1": {
     "url": "db://internal/default_prefab/ui/WebView.prefab",
@@ -3969,7 +3965,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "36ed4422-3542-4cc4-bf02-dc4bfc590836": {
     "url": "db://internal/default_prefab/ui/Widget.prefab",
@@ -3977,7 +3973,7 @@
       "depends": [],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "b078dcad-656d-4ba3-b76e-70c88e63e045": {
     "url": "db://internal/dependencies/textures/preintegrated-skin.png",
@@ -3994,7 +3990,7 @@
       ],
       "dependScripts": []
     },
-    "versionCode": 1
+    "versionCode": 2
   },
   "10b516ad-ae94-468a-a050-11ce19d40c3d": {
     "url": "db://internal/dependencies/textures/lut/original-color-grading.png",
@@ -4017,6 +4013,22 @@
     "value": {
       "depends": [
         "10b516ad-ae94-468a-a050-11ce19d40c3d"
+      ]
+    },
+    "versionCode": 1
+  },
+  "7ca08c6b-221a-43d5-8ad6-a6dd2ee7852b": {
+    "url": "db://internal/effects/pipeline/post-process/bloom-mipmap-blur.effect",
+    "value": {
+      "depends": []
+    },
+    "versionCode": 1
+  },
+  "9c3ea99f-fd05-43ec-9067-14ce54ccf9be": {
+    "url": "db://internal/default_renderpipeline/builtin-mipmap-bloom.mtl",
+    "value": {
+      "depends": [
+        "7ca08c6b-221a-43d5-8ad6-a6dd2ee7852b"
       ]
     },
     "versionCode": 1
