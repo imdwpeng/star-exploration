@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>星海迷航 - Star Exploration</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 加载屏幕 -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-logo">
+            <svg viewBox="0 0 100 100" width="150" height="150">
+                <defs>
+                    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+                        <stop offset="50%" style="stop-color:#b24bff;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#00ff88;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <circle cx="50" cy="50" r="45" fill="none" stroke="url(#logoGradient)" stroke-width="2" />
+                <circle cx="50" cy="50" r="35" fill="none" stroke="url(#logoGradient)" stroke-width="2" />
+                <circle cx="50" cy="50" r="25" fill="none" stroke="url(#logoGradient)" stroke-width="2" />
+                <circle cx="50" cy="50" r="15" fill="url(#logoGradient)" />
+                <path d="M50 5 L50 20 M50 80 L50 95 M5 50 L20 50 M80 50 L95 50" stroke="url(#logoGradient)" stroke-width="2" />
+            </svg>
+        </div>
+        <div class="loading-bar-container">
+            <div class="loading-progress" id="loading-progress" style="width: 0%"></div>
+        </div>
+        <div class="loading-text">系统初始化中...</div>
+    </div>
+
+    <!-- 首页 -->
+    <div id="home-page" class="page active">
+        <!-- 游戏HUD顶部 -->
+        <div class="game-hud-top">
+            <div class="player-hud">
+                <div class="player-avatar-mini">🚀</div>
+                <div class="player-stats">
+                    <div class="player-level">LV.42</div>
+                    <div class="player-name">星际探险家</div>
+                </div>
+            </div>
+            <div class="resource-hud">
+                <div class="res-item">
+                    <span class="res-icon" style="color: #ffd700">💎</span>
+                    <span class="res-value">12.4K</span>
+                </div>
+                <div class="res-item">
+                    <span class="res-icon" style="color: #00d4ff">⚡</span>
+                    <span class="res-value">8.3K</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主游戏区域 -->
+        <div class="main-game-area">
+            <div class="starfield" id="starfield"></div>
+            
+            <!-- 太空站全息投影 -->
+            <div class="station-hologram-container">
+                <div class="station-hologram">
+                    <div class="station-ring"></div>
+                    <div class="station-ring"></div>
+                    <div class="station-ring"></div>
+                    <div class="station-core"></div>
+                </div>
+            </div>
+
+            <!-- 左侧按钮组 -->
+            <div class="side-menu left-menu">
+                <button class="side-menu-btn" onclick="alert('任务中心')">
+                    <span class="side-btn-text">任务</span>
+                </button>
+                <button class="side-menu-btn" onclick="alert('排行榜')">
+                    <span class="side-btn-text">排行榜</span>
+                </button>
+                <button class="side-menu-btn" onclick="alert('通知')">
+                    <span class="side-btn-text">通知</span>
+                </button>
+                <button class="side-menu-btn" onclick="alert('活动')">
+                    <span class="side-btn-text">活动</span>
+                </button>
+                <button class="toggle-btn left-toggle" onclick="toggleMenu('left')">
+                    <span class="toggle-icon">⚡</span>
+                </button>
+            </div>
+
+            <!-- 右侧按钮组 -->
+            <div class="side-menu right-menu">
+                <button class="side-menu-btn main-explore-btn" onclick="switchPage('game')">
+                    <span class="side-btn-text">星际探险</span>
+                </button>
+                <button class="side-menu-btn" onclick="alert('合作模式')">
+                    <span class="side-btn-text">合作模式</span>
+                </button>
+                <button class="side-menu-btn" onclick="alert('太空站')">
+                    <span class="side-btn-text">太空站</span>
+                </button>
+                <button class="side-menu-btn" onclick="alert('创意工坊')">
+                    <span class="side-btn-text">创意工坊</span>
+                </button>
+                <button class="toggle-btn right-toggle" onclick="toggleMenu('right')">
+                    <span class="toggle-icon">🚀</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 游戏页面 -->
+    <div id="game-page" class="page">
+        <!-- 游戏HUD顶部 -->
+        <div class="game-hud-top">
+            <div class="level-hud">
+                <div class="level-number">第 3 关</div>
+                <div class="level-target">目标: 50/50</div>
+            </div>
+            <div class="energy-hud">
+                <div class="energy-bar-hud">
+                    <div class="energy-fill-hud" style="width: 75%"></div>
+                </div>
+                <div class="energy-text">75%</div>
+            </div>
+        </div>
+
+        <!-- 游戏区域 -->
+        <div class="game-area">
+            <div class="starfield" id="game-starfield"></div>
+            <div class="cube-grid" id="cube-grid">
+            </div>
+        </div>
+
+        <!-- 游戏控制面板 -->
+        <div class="game-control-panel">
+            <div class="slot-container" id="slot-container">
+                <div class="game-slot" data-index="0"></div>
+                <div class="game-slot" data-index="1"></div>
+                <div class="game-slot" data-index="2"></div>
+                <div class="game-slot" data-index="3"></div>
+                <div class="game-slot" data-index="4"></div>
+            </div>
+            <div class="timer-bar">
+                <div class="timer-fill" id="timer-fill" style="width: 100%"></div>
+            </div>
+            <div class="skill-bar">
+                <button class="skill-btn" onclick="scanRewards()">
+                    <span class="skill-icon">🔍</span>
+                    <span class="skill-name">扫描</span>
+                </button>
+                <button class="skill-btn" onclick="undoMove()">
+                    <span class="skill-icon">↩️</span>
+                    <span class="skill-name">回溯</span>
+                </button>
+                <button class="skill-btn" onclick="rearrange()">
+                    <span class="skill-icon">🔄</span>
+                    <span class="skill-name">重组</span>
+                </button>
+                <button class="skill-btn skill-ult" onclick="usePowerUp()">
+                    <span class="skill-icon">⚡</span>
+                    <span class="skill-name">能量</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 返回按钮 -->
+        <button class="back-btn" onclick="switchPage('home')">
+            <span class="back-icon">←</span>
+            <span class="back-text">返回</span>
+        </button>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

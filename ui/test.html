@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>星海迷航 - UI测试</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="loading-screen" id="loading">
+        <div class="loading-logo"></div>
+        <div class="loading-bar">
+            <div class="loading-fill"></div>
+        </div>
+        <div class="loading-text">正在初始化UI系统...</div>
+    </div>
+
+    <div class="page active" id="home-page">
+        <!-- 状态栏 -->
+        <div class="status-bar">
+            <span class="time">14:30</span>
+            <div class="network-indicator">●●●●</div>
+            <div class="battery">●●●●● 85%</div>
+        </div>
+
+        <!-- 玩家信息 -->
+        <div class="player-info">
+            <div class="avatar-container">
+                <div class="avatar">
+                    <div class="avatar-inner"></div>
+                </div>
+                <div class="level-badge">Lv.12</div>
+            </div>
+            <div class="player-name">星际探险家</div>
+        </div>
+
+        <!-- 资源面板 -->
+        <div class="resource-panel">
+            <div class="resource-item">
+                <div class="resource-icon">🪙</div>
+                <div class="resource-value">2,450</div>
+                <div class="resource-label">星币</div>
+            </div>
+            <div class="resource-item">
+                <div class="resource-icon">💎</div>
+                <div class="resource-value">128</div>
+                <div class="resource-label">水晶</div>
+            </div>
+            <div class="resource-item">
+                <div class="resource-icon">⚡</div>
+                <div class="resource-value">50</div>
+                <div class="resource-label">体力</div>
+            </div>
+        </div>
+
+        <!-- 主视觉区域：动态太空站 -->
+        <div class="main-visual">
+            <div class="space-station-container">
+                <div class="space-station">
+                    <div class="station-module module-core">中枢</div>
+                    <div class="station-module module-energy">能源</div>
+                    <div class="station-module module-habitat">居住</div>
+                    <div class="station-module module-lab">科研</div>
+                    <div class="station-module module-warehouse">仓库</div>
+                </div>
+                <div class="starfield">
+                    <div class="star"></div>
+                    <div class="star"></div>
+                    <div class="star"></div>
+                    <div class="star"></div>
+                    <div class="star"></div>
+                    <div class="star"></div>
+                    <div class="star"></div>
+                    <div class="star"></div>
+                </div>
+            </div>
+            <div class="nebula-bg"></div>
+        </div>
+
+        <!-- 主要功能按钮 -->
+        <div class="main-buttons">
+            <button class="btn-function btn-explore">
+                <div class="btn-icon">🚀</div>
+                <div class="btn-text">开始探索</div>
+                <div class="btn-badge">NEW</div>
+            </button>
+            <button class="btn-function btn-station">
+                <div class="btn-icon">🛖</div>
+                <div class="btn-text">我的太空站</div>
+            </button>
+            <button class="btn-function btn-exploration">
+                <div class="btn-icon">🌌</div>
+                <div class="btn-text">星际探索</div>
+                <div class="btn-badge">3</div>
+            </button>
+            <button class="btn-function btn-coop">
+                <div class="btn-icon">🤝</div>
+                <div class="btn-text">合作模式</div>
+            </button>
+            <button class="btn-function btn-workshop">
+                <div class="btn-icon">🛠️</div>
+                <div class="btn-text">创意工坊</div>
+            </button>
+            <button class="btn-function btn-leaderboard">
+                <div class="btn-icon">🏆</div>
+                <div class="btn-text">排行榜</div>
+            </button>
+        </div>
+
+        <!-- 底部导航 -->
+        <div class="bottom-nav">
+            <button class="nav-item active" data-page="home">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">首页</div>
+            </button>
+            <button class="nav-item" data-page="activity">
+                <div class="nav-icon">🎉</div>
+                <div class="nav-label">活动</div>
+                <div class="nav-badge">2</div>
+            </button>
+            <button class="nav-item" data-page="mail">
+                <div class="nav-icon">📧</div>
+                <div class="nav-label">邮件</div>
+            </button>
+            <button class="nav-item" data-page="shop">
+                <div class="nav-icon">🛒</div>
+                <div class="nav-label">商店</div>
+            </button>
+            <button class="nav-item" data-page="settings">
+                <div class="nav-icon">⚙️</div>
+                <div class="nav-label">设置</div>
+            </button>
+        </div>
+    </div>
+
+    <div class="page" id="game-page">
+        <!-- 顶部信息栏 -->
+        <div class="game-top-bar">
+            <div class="level-name">天狼星系 - 第5关</div>
+            <div class="energy-bar">
+                <div class="energy-label">能量</div>
+                <div class="energy-fill" style="width: 75%"></div>
+            </div>
+        </div>
+
+        <!-- 三维星图区域 -->
+        <div class="star-map-container">
+            <div class="star-map">
+                <div class="cube-grid">
+                    <!-- 方块将通过JS动态生成 -->
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
+                    <div class="block" data-type="blue"></div>
+                    <div class="block" data-type="green"></div>
+                    <div class="block" data-type="red"></div>
+                    <div class="block" data-type="yellow"></div>
