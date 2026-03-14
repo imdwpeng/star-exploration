@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>星海迷航 - Star Exploration</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 </head>
 <body>
     <!-- 加载屏幕 -->
@@ -127,7 +128,12 @@
         <!-- 游戏区域 -->
         <div class="game-area">
             <div class="starfield" id="game-starfield"></div>
-            <div class="cube-grid" id="cube-grid">
+            <!-- Three.js 3D场景容器 -->
+            <div id="three-container" class="three-container"></div>
+            <!-- 3D场景控制提示 -->
+            <div class="scene-controls-hint">
+                <span class="hint-icon">👆</span>
+                <span class="hint-text">拖动旋转视角 · 点击方块消除</span>
             </div>
         </div>
 
