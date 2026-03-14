@@ -15,5 +15,9 @@
   "license": "ISC",
   "dependencies": {
     "threejs-miniprogram": "latest"
-  }
+  },
+  "creator": {
+    "version": "3.8.6"
+  },
+  "uuid": "5388d729-83dd-4f35-a30b-15b62196597b"
 }
